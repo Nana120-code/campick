@@ -310,44 +310,51 @@ function renderBottomNav(active){
     </nav>`;
 }
 
-/* ── 관심사 기반 추천 게시물 풀 (관심사별 3개씩) ────────────── */
-const REC_POOL = [
+/* ── 콘텐츠 저장소 ──────────────────────────────────────────
+   공모전·대외활동·스터디 등 앱이 보여 주는 활동 정보를 여기 한 곳에 모은다.
+   홈 추천 / 탐색 / 저장 / 상세가 모두 이 배열을 id로 참조한다. */
+function findContent(id){ return CONTENTS.find(c => c.id === id) || null; }
+function pickContents(ids){ return ids.map(findContent).filter(Boolean); }
+
+const CONTENTS = [
   // 디자인
-  { tags:['디자인','공모전'], title:{ko:'2026 UI/UX 디자인 공모전', en:'2026 UI/UX Design Contest', zh:'2026 UI/UX设计大赛', ja:'2026 UI/UXデザインコンテスト'}, deadline:'~05.20', urgent:false, icon:'iconoir:trophy', img:'https://images.unsplash.com/photo-1502810190503-8303352d0dd1?w=200&h=200&fit=crop&q=80' },
-  { tags:['디자인','문화/예술'], title:{ko:'브랜드 아이덴티티 디자인 전시회', en:'Brand Identity Design Exhibition', zh:'品牌形象设计展', ja:'ブランドアイデンティティデザイン展'}, deadline:'~05.28', urgent:false, icon:'iconoir:design-pencil', img:'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=200&h=200&fit=crop&q=80' },
-  { tags:['디자인','스터디'], title:{ko:'타이포그래피 디자인 스터디 모집', en:'Typography Design Study Group', zh:'招募字体设计学习小组成员', ja:'タイポグラフィデザインスタディ募集'}, deadline:'~04.25', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=200&h=200&fit=crop&q=80' },
+  { id:'ux-contest', tags:['디자인','공모전'], title:{ko:'2026 UI/UX 디자인 공모전', en:'2026 UI/UX Design Contest', zh:'2026 UI/UX设计大赛', ja:'2026 UI/UXデザインコンテスト'}, deadline:'~05.20', urgent:false, icon:'iconoir:trophy', img:'https://images.unsplash.com/photo-1502810190503-8303352d0dd1?w=200&h=200&fit=crop&q=80' },
+  { id:'brand-exhibit', tags:['디자인','문화/예술'], title:{ko:'브랜드 아이덴티티 디자인 전시회', en:'Brand Identity Design Exhibition', zh:'品牌形象设计展', ja:'ブランドアイデンティティデザイン展'}, deadline:'~05.28', urgent:false, icon:'iconoir:design-pencil', img:'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=200&h=200&fit=crop&q=80' },
+  { id:'typo-study', tags:['디자인','스터디'], title:{ko:'타이포그래피 디자인 스터디 모집', en:'Typography Design Study Group', zh:'招募字体设计学习小组成员', ja:'タイポグラフィデザインスタディ募集'}, deadline:'~04.25', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=200&h=200&fit=crop&q=80' },
   // IT / 개발
-  { tags:['IT / 개발','스터디'], title:{ko:'데이터 분석 스터디 모집', en:'Data Analysis Study Group', zh:'招募数据分析学习小组成员', ja:'データ分析スタディ募集'}, deadline:'~04.30', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=200&h=200&fit=crop&q=80' },
-  { tags:['IT / 개발','해커톤'], title:{ko:'ESG 아이디어 해커톤', en:'ESG Idea Hackathon', zh:'ESG创意黑客马拉松', ja:'ESGアイデアハッカソン'}, deadline:'~06.07', urgent:false, icon:'iconoir:code', img:'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop&q=80' },
-  { tags:['IT / 개발','프로젝트'], title:{ko:'캠퍼스 앱 개발 프로젝트 팀원 모집', en:'Campus App Dev Project Team', zh:'招募校园App开发项目成员', ja:'キャンパスアプリ開発プロジェクトメンバー募集'}, deadline:'~05.12', urgent:false, icon:'iconoir:code', img:'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=200&h=200&fit=crop&q=80' },
+  { id:'data-study', tags:['IT / 개발','스터디'], title:{ko:'데이터 분석 스터디 모집', en:'Data Analysis Study Group', zh:'招募数据分析学习小组成员', ja:'データ分析スタディ募集'}, deadline:'~04.30', urgent:true, icon:'iconoir:group', desc:{ko:'함께 성장할 데이터 분석 스터디 팀원을 찾습니다!', en:'Looking for members to grow together in data analysis!', zh:'寻找一起成长的数据分析学习小组成员！', ja:'共に成長するデータ分析スタディメンバーを探しています！'}, eye:'856', comment:'86', img:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=200&h=200&fit=crop&q=80' },
+  { id:'esg-hack', tags:['IT / 개발','해커톤'], title:{ko:'ESG 아이디어 해커톤', en:'ESG Idea Hackathon', zh:'ESG创意黑客马拉松', ja:'ESGアイデアハッカソン'}, deadline:'~06.07', urgent:false, icon:'iconoir:code', desc:{ko:'지속 가능한 미래를 위한 아이디어를 제안해 주세요.', en:'Propose ideas for a sustainable future.', zh:'请为可持续发展的未来提出创意。', ja:'持続可能な未来のためのアイデアをご提案ください。'}, eye:'1.5K', comment:'152', img:'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop&q=80' },
+  { id:'campus-app', tags:['IT / 개발','프로젝트'], title:{ko:'캠퍼스 앱 개발 프로젝트 팀원 모집', en:'Campus App Dev Project Team', zh:'招募校园App开发项目成员', ja:'キャンパスアプリ開発プロジェクトメンバー募集'}, deadline:'~05.12', urgent:false, icon:'iconoir:code', img:'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=200&h=200&fit=crop&q=80' },
   // 영상 / 미디어
-  { tags:['영상 / 미디어','공모전'], title:{ko:'대학생 단편 영상 공모전', en:'College Short Film Contest', zh:'大学生短片竞赛', ja:'大学生短編映像コンテスト'}, deadline:'~05.31', urgent:false, icon:'iconoir:play', img:'https://images.unsplash.com/photo-1552581234-26160f608093?w=200&h=200&fit=crop&q=80' },
-  { tags:['영상 / 미디어','스터디'], title:{ko:'브이로그 크리에이터 스터디 모집', en:'Vlog Creator Study Group', zh:'招募Vlog创作者学习小组成员', ja:'Vlogクリエイタースタディ募集'}, deadline:'~04.28', urgent:true, icon:'iconoir:play', img:'https://images.unsplash.com/photo-1595872018818-97555653a011?w=200&h=200&fit=crop&q=80' },
-  { tags:['영상 / 미디어','행사'], title:{ko:'미디어아트 전시 & 상영회', en:'Media Art Exhibition & Screening', zh:'媒体艺术展览暨放映会', ja:'メディアアート展示&上映会'}, deadline:'~05.16', urgent:false, icon:'iconoir:play', img:'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=200&h=200&fit=crop&q=80' },
+  { id:'short-film', tags:['영상 / 미디어','공모전'], title:{ko:'대학생 단편 영상 공모전', en:'College Short Film Contest', zh:'大学生短片竞赛', ja:'大学生短編映像コンテスト'}, deadline:'~05.31', urgent:false, icon:'iconoir:play', img:'https://images.unsplash.com/photo-1552581234-26160f608093?w=200&h=200&fit=crop&q=80' },
+  { id:'vlog-study', tags:['영상 / 미디어','스터디'], title:{ko:'브이로그 크리에이터 스터디 모집', en:'Vlog Creator Study Group', zh:'招募Vlog创作者学习小组成员', ja:'Vlogクリエイタースタディ募集'}, deadline:'~04.28', urgent:true, icon:'iconoir:play', img:'https://images.unsplash.com/photo-1595872018818-97555653a011?w=200&h=200&fit=crop&q=80' },
+  { id:'media-art', tags:['영상 / 미디어','행사'], title:{ko:'미디어아트 전시 & 상영회', en:'Media Art Exhibition & Screening', zh:'媒体艺术展览暨放映会', ja:'メディアアート展示&上映会'}, deadline:'~05.16', urgent:false, icon:'iconoir:play', img:'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=200&h=200&fit=crop&q=80' },
   // 마케팅
-  { tags:['마케팅','대외활동'], title:{ko:'대학생 마케팅 서포터즈 15기 모집', en:'15th College Marketing Supporters', zh:'第15期大学生市场营销支持者招募', ja:'大学生マーケティングサポーターズ15期募集'}, deadline:'~05.09', urgent:false, icon:'iconoir:megaphone', img:'https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=200&h=200&fit=crop&q=80' },
-  { tags:['마케팅','공모전'], title:{ko:'SNS 콘텐츠 마케팅 공모전', en:'SNS Content Marketing Contest', zh:'SNS内容营销大赛', ja:'SNSコンテンツマーケティングコンテスト'}, deadline:'~05.23', urgent:false, icon:'iconoir:megaphone', img:'https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=200&h=200&fit=crop&q=80' },
-  { tags:['마케팅','스터디'], title:{ko:'브랜드 마케팅 전략 스터디', en:'Brand Marketing Strategy Study', zh:'品牌营销战略学习小组', ja:'ブランドマーケティング戦略スタディ'}, deadline:'~04.22', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=200&fit=crop&q=80' },
+  { id:'mkt-supporters', tags:['마케팅','대외활동'], title:{ko:'대학생 마케팅 서포터즈 15기 모집', en:'15th College Marketing Supporters', zh:'第15期大学生市场营销支持者招募', ja:'大学生マーケティングサポーターズ15期募集'}, deadline:'~05.09', urgent:false, icon:'iconoir:megaphone', img:'https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=200&h=200&fit=crop&q=80' },
+  { id:'sns-contest', tags:['마케팅','공모전'], title:{ko:'SNS 콘텐츠 마케팅 공모전', en:'SNS Content Marketing Contest', zh:'SNS内容营销大赛', ja:'SNSコンテンツマーケティングコンテスト'}, deadline:'~05.23', urgent:false, icon:'iconoir:megaphone', img:'https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=200&h=200&fit=crop&q=80' },
+  { id:'brand-study', tags:['마케팅','스터디'], title:{ko:'브랜드 마케팅 전략 스터디', en:'Brand Marketing Strategy Study', zh:'品牌营销战略学习小组', ja:'ブランドマーケティング戦略スタディ'}, deadline:'~04.22', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=200&fit=crop&q=80' },
   // 여행 / 캠핑
-  { tags:['여행 / 캠핑','번개'], title:{ko:'제주도 2박 3일 번개 여행', en:'3-Day Jeju Island Meetup Trip', zh:'济州岛3天2夜快闪旅行', ja:'済州島2泊3日突発旅行'}, deadline:'~05.10', urgent:false, icon:'iconoir:map', img:'https://images.unsplash.com/photo-1628411848698-e3b3249a272a?w=200&h=200&fit=crop&q=80' },
-  { tags:['여행 / 캠핑','번개'], title:{ko:'가을맞이 대학생 캠핑 모임', en:'Autumn Camping Meetup for Students', zh:'迎秋大学生露营聚会', ja:'秋の大学生キャンプ集会'}, deadline:'~05.18', urgent:false, icon:'iconoir:map', img:'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=200&h=200&fit=crop&q=80' },
-  { tags:['여행 / 캠핑','대외활동'], title:{ko:'국내 배낭여행 동아리원 모집', en:'Domestic Backpacking Club Members Wanted', zh:'招募国内背包旅行社团成员', ja:'国内バックパック旅行サークル員募集'}, deadline:'~04.27', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=200&h=200&fit=crop&q=80' },
+  { id:'jeju-trip', tags:['여행 / 캠핑','번개'], title:{ko:'제주도 2박 3일 번개 여행', en:'3-Day Jeju Island Meetup Trip', zh:'济州岛3天2夜快闪旅行', ja:'済州島2泊3日突発旅行'}, deadline:'~05.10', urgent:false, icon:'iconoir:map', img:'https://images.unsplash.com/photo-1628411848698-e3b3249a272a?w=200&h=200&fit=crop&q=80' },
+  { id:'autumn-camp', tags:['여행 / 캠핑','번개'], title:{ko:'가을맞이 대학생 캠핑 모임', en:'Autumn Camping Meetup for Students', zh:'迎秋大学生露营聚会', ja:'秋の大学生キャンプ集会'}, deadline:'~05.18', urgent:false, icon:'iconoir:map', img:'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=200&h=200&fit=crop&q=80' },
+  { id:'backpack-club', tags:['여행 / 캠핑','대외활동'], title:{ko:'국내 배낭여행 동아리원 모집', en:'Domestic Backpacking Club Members Wanted', zh:'招募国内背包旅行社团成员', ja:'国内バックパック旅行サークル員募集'}, deadline:'~04.27', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=200&h=200&fit=crop&q=80' },
   // 사진
-  { tags:['사진','공모전'], title:{ko:'캠퍼스 사진 공모전 - 나의 대학생활', en:'Campus Photo Contest — My College Life', zh:'校园摄影大赛——我的大学生活', ja:'キャンパス写真コンテスト —私の大学生活'}, deadline:'~05.25', urgent:false, icon:'iconoir:camera', img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=200&h=200&fit=crop&q=80' },
-  { tags:['사진','스터디'], title:{ko:'필름 사진 동호회 신입 모집', en:'Film Photography Club New Members', zh:'招募胶片摄影社新成员', ja:'フィルム写真同好会新入部員募集'}, deadline:'~04.29', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=200&h=200&fit=crop&q=80' },
-  { tags:['사진','번개'], title:{ko:'사진작가와 함께하는 출사 모임', en:'Photo Walk with a Pro Photographer', zh:'与摄影师一起的外拍活动', ja:'写真家と行く撮影会'}, deadline:'~05.14', urgent:false, icon:'iconoir:camera', img:'https://images.unsplash.com/photo-1560421683-6856ea585c78?w=200&h=200&fit=crop&q=80' },
+  { id:'campus-photo', tags:['사진','공모전'], title:{ko:'캠퍼스 사진 공모전 - 나의 대학생활', en:'Campus Photo Contest — My College Life', zh:'校园摄影大赛——我的大学生活', ja:'キャンパス写真コンテスト —私の大学生活'}, deadline:'~05.25', urgent:false, icon:'iconoir:camera', img:'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=200&h=200&fit=crop&q=80' },
+  { id:'film-club', tags:['사진','스터디'], title:{ko:'필름 사진 동호회 신입 모집', en:'Film Photography Club New Members', zh:'招募胶片摄影社新成员', ja:'フィルム写真同好会新入部員募集'}, deadline:'~04.29', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=200&h=200&fit=crop&q=80' },
+  { id:'photo-walk', tags:['사진','번개'], title:{ko:'사진작가와 함께하는 출사 모임', en:'Photo Walk with a Pro Photographer', zh:'与摄影师一起的外拍活动', ja:'写真家と行く撮影会'}, deadline:'~05.14', urgent:false, icon:'iconoir:camera', img:'https://images.unsplash.com/photo-1560421683-6856ea585c78?w=200&h=200&fit=crop&q=80' },
   // 음악
-  { tags:['음악','공모전'], title:{ko:'대학가요제 참가팀 모집', en:'College Song Festival Team Recruitment', zh:'大学歌谣祭参赛队伍招募', ja:'大学歌謡祭参加チーム募集'}, deadline:'~05.30', urgent:false, icon:'iconoir:music-note', img:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop&q=80' },
-  { tags:['음악','대외활동'], title:{ko:'밴드 동아리 세션 멤버 모집', en:'Band Club Session Member Recruitment', zh:'乐队社团招募伴奏成员', ja:'バンドサークルセッションメンバー募集'}, deadline:'~04.24', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=200&h=200&fit=crop&q=80' },
-  { tags:['음악','행사'], title:{ko:'버스킹 페스티벌 자원봉사자 모집', en:'Busking Festival Volunteer Recruitment', zh:'街头表演节志愿者招募', ja:'ストリートライブフェスティバルボランティア募集'}, deadline:'~05.17', urgent:false, icon:'iconoir:music-note', img:'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=200&h=200&fit=crop&q=80' },
+  { id:'song-festival', tags:['음악','공모전'], title:{ko:'대학가요제 참가팀 모집', en:'College Song Festival Team Recruitment', zh:'大学歌谣祭参赛队伍招募', ja:'大学歌謡祭参加チーム募集'}, deadline:'~05.30', urgent:false, icon:'iconoir:music-note', img:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop&q=80' },
+  { id:'band-session', tags:['음악','대외활동'], title:{ko:'밴드 동아리 세션 멤버 모집', en:'Band Club Session Member Recruitment', zh:'乐队社团招募伴奏成员', ja:'バンドサークルセッションメンバー募集'}, deadline:'~04.24', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=200&h=200&fit=crop&q=80' },
+  { id:'busking-volunteer', tags:['음악','행사'], title:{ko:'버스킹 페스티벌 자원봉사자 모집', en:'Busking Festival Volunteer Recruitment', zh:'街头表演节志愿者招募', ja:'ストリートライブフェスティバルボランティア募集'}, deadline:'~05.17', urgent:false, icon:'iconoir:music-note', img:'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=200&h=200&fit=crop&q=80' },
   // 창업
-  { tags:['창업','공모전'], title:{ko:'전국 대학생 창업 아이디어 공모전', en:'National College Startup Idea Contest', zh:'全国大学生创业创意大赛', ja:'全国大学生起業アイデアコンテスト'}, deadline:'~06.05', urgent:false, icon:'iconoir:light-bulb', img:'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200&h=200&fit=crop&q=80' },
-  { tags:['창업','대외활동'], title:{ko:'스타트업 인턴십 프로그램 모집', en:'Startup Internship Program', zh:'创业公司实习项目招募', ja:'スタートアップインターンシッププログラム募集'}, deadline:'~05.02', urgent:true, icon:'iconoir:light-bulb', img:'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=200&h=200&fit=crop&q=80' },
-  { tags:['창업','프로젝트'], title:{ko:'예비창업패키지 도전 팀원 모집', en:'Pre-Startup Package Challenge Team', zh:'招募预备创业扶持项目挑战团队成员', ja:'予備創業パッケージ挑戦チームメンバー募集'}, deadline:'~05.21', urgent:false, icon:'iconoir:light-bulb', img:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200&h=200&fit=crop&q=80' },
+  { id:'startup-idea', tags:['창업','공모전'], title:{ko:'전국 대학생 창업 아이디어 공모전', en:'National College Startup Idea Contest', zh:'全国大学生创业创意大赛', ja:'全国大学生起業アイデアコンテスト'}, deadline:'~06.05', urgent:false, icon:'iconoir:light-bulb', img:'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200&h=200&fit=crop&q=80' },
+  { id:'startup-intern', tags:['창업','대외활동'], title:{ko:'스타트업 인턴십 프로그램 모집', en:'Startup Internship Program', zh:'创业公司实习项目招募', ja:'スタートアップインターンシッププログラム募集'}, deadline:'~05.02', urgent:true, icon:'iconoir:light-bulb', img:'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=200&h=200&fit=crop&q=80' },
+  { id:'prestartup-team', tags:['창업','프로젝트'], title:{ko:'예비창업패키지 도전 팀원 모집', en:'Pre-Startup Package Challenge Team', zh:'招募预备创业扶持项目挑战团队成员', ja:'予備創業パッケージ挑戦チームメンバー募集'}, deadline:'~05.21', urgent:false, icon:'iconoir:light-bulb', img:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200&h=200&fit=crop&q=80' },
   // 인문 / 사회
-  { tags:['인문 / 사회','스터디'], title:{ko:'인문학 고전 독서 토론 모임', en:'Humanities Classics Reading Group', zh:'人文经典读书讨论会', ja:'人文学古典読書討論会'}, deadline:'~04.26', urgent:true, icon:'iconoir:book', img:'https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=200&h=200&fit=crop&q=80' },
-  { tags:['인문 / 사회','공모전'], title:{ko:'사회혁신 아이디어 공모전', en:'Social Innovation Idea Contest', zh:'社会创新创意大赛', ja:'社会革新アイデアコンテスト'}, deadline:'~05.29', urgent:false, icon:'iconoir:book', img:'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=200&h=200&fit=crop&q=80' },
-  { tags:['인문 / 사회','대외활동'], title:{ko:'교육 봉사활동 서포터즈 모집', en:'Education Volunteer Supporters', zh:'教育志愿服务支持者招募', ja:'教育ボランティア活動サポーターズ募集'}, deadline:'~05.06', urgent:false, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1509824227185-9c5a01ceba0d?w=200&h=200&fit=crop&q=80' },
+  { id:'classics-reading', tags:['인문 / 사회','스터디'], title:{ko:'인문학 고전 독서 토론 모임', en:'Humanities Classics Reading Group', zh:'人文经典读书讨论会', ja:'人文学古典読書討論会'}, deadline:'~04.26', urgent:true, icon:'iconoir:book', img:'https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=200&h=200&fit=crop&q=80' },
+  { id:'social-innovation', tags:['인문 / 사회','공모전'], title:{ko:'사회혁신 아이디어 공모전', en:'Social Innovation Idea Contest', zh:'社会创新创意大赛', ja:'社会革新アイデアコンテスト'}, deadline:'~05.29', urgent:false, icon:'iconoir:book', img:'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=200&h=200&fit=crop&q=80' },
+  { id:'edu-volunteer', tags:['인문 / 사회','대외활동'], title:{ko:'교육 봉사활동 서포터즈 모집', en:'Education Volunteer Supporters', zh:'教育志愿服务支持者招募', ja:'教育ボランティア活動サポーターズ募集'}, deadline:'~05.06', urgent:false, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1509824227185-9c5a01ceba0d?w=200&h=200&fit=crop&q=80' },
+  // 탐색·저장 화면에 따로 적혀 있던 항목을 여기로 옮겼다
+  { id:'korea-design', tags:['디자인','공모전'], title:{ko:'2026 대한민국 디자인 공모전', en:'2026 Korea Design Contest', zh:'2026韩国设计大赛', ja:'2026韓国デザインコンテスト'}, desc:{ko:'창의적인 아이디어로 세상을 디자인하세요!', en:'Design the world with your creative ideas!', zh:'用创意设计世界吧！', ja:'創造的なアイデアで世界をデザインしよう！'}, deadline:'~05.20', urgent:false, icon:'iconoir:trophy', eye:'1.2K', comment:'124', img:'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=200&h=200&fit=crop&q=80' },
 ];
 
 /* ════════════════════════════════════════════════════════════
@@ -664,9 +671,9 @@ const ViewHome = {
 
     const selectedInterests = loadInterests();
 
-    let items = REC_POOL.filter(it => selectedInterests.includes(it.tags[0]));
+    let items = CONTENTS.filter(it => selectedInterests.includes(it.tags[0]));
     if(items.length < 6){
-      const rest = REC_POOL.filter(it => !items.includes(it));
+      const rest = CONTENTS.filter(it => !items.includes(it));
       items = items.concat(rest.slice(0, 6 - items.length));
     }
     items = items.slice(0, 7);
@@ -737,11 +744,7 @@ const ViewSearch = {
       });
     });
 
-    const results = [
-      { tags:['디자인','공모전'], title:{ko:'2024 대한민국 디자인 공모전', en:'2024 Korea Design Contest', zh:'2024韩国设计大赛', ja:'2024韓国デザインコンテスト'}, desc:{ko:'창의적인 아이디어로 세상을 디자인하세요!', en:'Design the world with your creative ideas!', zh:'用创意设计世界吧！', ja:'創造的なアイデアで世界をデザインしよう！'}, deadline:'~05.20', eye:'1.2k', comment:'124' },
-      { tags:['IT / 개발','스터디'], title:{ko:'데이터 분석 스터디 모집', en:'Data Analysis Study Group', zh:'招募数据分析学习小组成员', ja:'データ分析スタディ募集'}, desc:{ko:'함께 성장할 데이터 분석 스터디 팀원을 찾습니다!', en:'Looking for members to grow together in data analysis!', zh:'寻找一起成长的数据分析学习小组成员！', ja:'共に成長するデータ分析スタディメンバーを探しています！'}, deadline:'~04.30', eye:'856', comment:'86' },
-      { tags:['IT','해커톤'], title:{ko:'ESG 아이디어 해커톤', en:'ESG Idea Hackathon', zh:'ESG创意黑客马拉松', ja:'ESGアイデアハッカソン'}, desc:{ko:'지속 가능한 미래를 위한 아이디어를 제안해 주세요.', en:'Propose ideas for a sustainable future.', zh:'请为可持续发展的未来提出创意。', ja:'持続可能な未来のためのアイデアをご提案ください。'}, deadline:'~06.07', eye:'1.5k', comment:'152' },
-    ];
+    const results = pickContents(['korea-design','data-study','esg-hack']);
     APP.querySelector('#resultList').innerHTML = results.map(r => `
       <div class="card" data-route="#/detail">
         <div class="tag-row">${r.tags.map(tagChip).join('<span class="sep">ㅣ</span>')}</div>
@@ -1328,13 +1331,7 @@ const ViewSave = {
   },
 
   init(){
-    const saved = [
-      { tags:['공모전','디자인'], title:{ko:'2026 대한민국 디자인 공모전', en:'2026 Korea Design Contest', zh:'2026韩国设计大赛', ja:'2026韓国デザインコンテスト'}, desc:{ko:'창의적인 아이디어로 세상을 디자인하세요!', en:'Design the world with your creative ideas!', zh:'用创意设计世界吧！', ja:'創造的なアイデアで世界をデザインしよう！'}, deadline:'~05.20', eye:'1.2K', comment:'124' },
-      { tags:['스터디','IT/개발'], title:{ko:'데이터 분석 스터디 모집', en:'Data Analysis Study Group', zh:'招募数据分析学习小组成员', ja:'データ分析スタディ募集'}, desc:{ko:'함께 성장할 데이터 분석 스터디 팀원을 찾습니다!', en:'Looking for members to grow together in data analysis!', zh:'寻找一起成长的数据分析学习小组成员！', ja:'共に成長するデータ分析スタディメンバーを探しています！'}, deadline:'~04.30', eye:'856', comment:'86' },
-      { tags:['대외활동','IT'], title:{ko:'ESG 아이디어 해커톤', en:'ESG Idea Hackathon', zh:'ESG创意黑客马拉松', ja:'ESGアイデアハッカソン'}, desc:{ko:'지속 가능한 미래를 위한 아이디어를 제안해 주세요.', en:'Propose ideas for a sustainable future.', zh:'请为可持续发展的未来提出创意。', ja:'持続可能な未来のためのアイデアをご提案ください。'}, deadline:'~06.07', eye:'1.5K', comment:'152' },
-      { tags:['행사','문화/예술'], title:{ko:'봄맞이 캠퍼스 페스티벌', en:'Spring Campus Festival', zh:'迎春校园节', ja:'春のキャンパスフェスティバル'}, desc:{ko:'다양한 공연과 체험 프로그램이 가득!', en:'Packed with performances and hands-on programs!', zh:'丰富多彩的演出与体验活动！', ja:'多彩な公演と体験プログラムが盛りだくさん！'}, deadline:'~05.16', eye:'632', comment:'52' },
-      { tags:['여행','제주'], title:{ko:'제주도 2박 3일 번개 여행', en:'3-Day Jeju Island Meetup Trip', zh:'济州岛3天2夜快闪旅行', ja:'済州島2泊3日突発旅行'}, desc:{ko:'제주 자연 속에서 힐링하고 싶은 사람 모여라!', en:'Come heal in the nature of Jeju!', zh:'想在济州岛的大自然中治愈身心的人快来吧！', ja:'済州の自然の中で癒されたい人集まれ！'}, deadline:'~05.10', eye:'478', comment:'38' },
-    ];
+    const saved = pickContents(['korea-design','data-study','esg-hack']);
 
     const listEl = APP.querySelector('#savedList');
     listEl.innerHTML = saved.map((it, i) => `
