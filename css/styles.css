@@ -460,6 +460,10 @@ button{ font-family:inherit; }
 
 /* 내가 쓴 글 상세 */
 .view-detail .post-body{ margin:0 0 26px; font-size:14.5px; line-height:1.7; color:var(--color-body); white-space:pre-wrap; word-break:break-word; }
+/* 커뮤니티 샘플 글 하단의 좋아요·댓글 수 */
+.view-detail .post-reactions{ display:flex; align-items:center; gap:16px; padding-top:18px; border-top:1px solid var(--color-border); margin-bottom:26px; }
+.view-detail .post-reactions .stat{ display:flex; align-items:center; gap:5px; font-size:13px; font-weight:600; color:var(--color-muted); }
+.view-detail .post-reactions .icon{ width:15px; height:15px; }
 .view-detail .post-photos{ display:flex; flex-direction:column; gap:10px; margin-bottom:26px; }
 .view-detail .post-photos img{ width:100%; border-radius:14px; display:block; }
 
