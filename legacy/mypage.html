@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>CamPick · 마이페이지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+<style>
+  :root{
+    --color-bg:#fbfbfe; --color-surface:#ffffff; --color-title:#111111;
+    --color-body:#595e90; --color-muted:#9a9dc0; --color-border:rgba(89,94,144,0.14);
+    --color-accent:#4d31fc; --color-accent-2:#4732f7;
+    --grad-primary: linear-gradient(90deg,#3d70fb,#7e3efc);
+    --shadow-card: 0 2px 14px rgba(31,29,90,0.07);
+    --safe-top: env(safe-area-inset-top,0px);
+    --safe-bottom: env(safe-area-inset-bottom,0px);
+    --nav-h: 64px;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; background:var(--color-bg); }
+  body{ font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif; }
+  a{ text-decoration:none; color:inherit; }
+  button{ font-family:inherit; }
+  .icon{ display:inline-block; background-color:currentColor; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; flex-shrink:0; }
+
+  .app{ max-width:480px; margin:0 auto; min-height:100vh; min-height:100dvh; background:var(--color-bg); position:relative; padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px); }
+
+  .topbar{ padding: calc(var(--safe-top) + 14px) 20px 6px; }
+  .topbar h1{ margin:0; font-size: clamp(20px,5.4vw,24px); font-weight:800; color:var(--color-title); letter-spacing:-0.02em; }
+
+  /* 프로필 카드 */
+  .profile-card{ margin: 16px 20px 18px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:20px; box-shadow:var(--shadow-card); }
+  .profile-top{ display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+  .avatar{ width:60px; height:60px; border-radius:50%; background: linear-gradient(135deg,#3d70fb,#7e3efc); overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-weight:800; font-size:22px; }
+  .avatar > svg, .avatar > img{ width:100%; height:100%; display:block; object-fit:cover; }
+  .profile-info{ min-width:0; flex:1; }
+  .profile-name{ font-size: clamp(17px,4.6vw,19px); font-weight:800; color:var(--color-title); margin:0 0 4px; display:flex; align-items:center; gap:6px; }
+  .profile-dept{ font-size:13px; color:var(--color-body); font-weight:500; margin:0 0 6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .verified-badge{ display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; color:#059669; background:#e8fbf0; padding:3px 8px; border-radius:999px; }
+  .verified-badge .icon{ width:11px; height:11px; }
+
+  .stat-row{ display:flex; border-top:1px solid var(--color-border); padding-top:16px; }
+  .stat-item{ flex:1; text-align:center; }
+  .stat-item + .stat-item{ border-left:1px solid var(--color-border); }
+  .stat-num{ font-size: clamp(16px,4.3vw,18px); font-weight:800; color:var(--color-title); margin-bottom:3px; }
+  .stat-label{ font-size:11.5px; color:var(--color-muted); font-weight:600; }
+
+  .section{ margin: 0 20px 18px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:18px; padding:18px 20px; box-shadow:var(--shadow-card); }
+  .section-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .section-head h2{ margin:0; font-size:15.5px; font-weight:800; color:var(--color-title); }
+  .link-btn{ font-size:12.5px; font-weight:700; color:var(--color-accent-2); background:none; border:none; cursor:pointer; }
+
+  .chip-wrap{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{ background:#f1f2fa; color:var(--color-body); font-size:12.5px; font-weight:700; padding:8px 13px; border-radius:999px; }
+
+  .verify-row{ display:flex; align-items:center; gap:12px; }
+  .verify-icon{ width:42px; height:42px; border-radius:12px; background:#e8fbf0; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .verify-icon .icon{ width:20px; height:20px; color:#059669; }
+  .verify-text b{ display:block; font-size:14px; color:var(--color-title); margin-bottom:2px; }
+  .verify-text span{ font-size:12px; color:var(--color-muted); }
+
+  /* 설정 리스트 */
+  .menu-list{ margin: 0 20px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:18px; box-shadow:var(--shadow-card); overflow:hidden; }
+  .menu-item{ display:flex; align-items:center; gap:13px; padding:15px 18px; cursor:pointer; }
+  .menu-item + .menu-item{ border-top:1px solid var(--color-border); }
+  .menu-item .icon-box{ width:32px; height:32px; border-radius:9px; background:#f1f2fa; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .menu-item .icon-box .icon{ width:16px; height:16px; color:var(--color-body); }
+  .menu-item span.label{ flex:1; font-size:14px; font-weight:600; color:var(--color-title); }
+  .menu-item .chev{ width:14px; height:14px; color:var(--color-muted); }
+  .menu-item.danger span.label{ color:#ef4444; }
+  .menu-item.danger .icon-box{ background:#fef2f2; }
+  .menu-item.danger .icon-box .icon{ color:#ef4444; }
+
+  .section-label{ padding: 20px 24px 8px; font-size:12px; font-weight:700; color:var(--color-muted); }
+
+  .bottom-nav{ position:fixed; left:0; right:0; bottom:0; z-index:20; background:var(--color-surface); border-top:1px solid var(--color-border); display:flex; padding-bottom:var(--safe-bottom); box-shadow: 0 -4px 16px rgba(31,29,90,0.05); }
+  .app-wrap{ max-width:480px; margin:0 auto; position:relative; }
+  .nav-item{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:9px 4px 8px; color:var(--color-muted); cursor:pointer; }
+  .nav-item .icon{ width:22px; height:22px; }
+  .nav-item span{ font-size:10.5px; font-weight:600; }
+  .nav-item.active{ color:var(--color-accent-2); }
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+<div class="app">
+
+  <div class="topbar"><h1>마이페이지</h1></div>
+
+  <div class="profile-card">
+    <div class="profile-top">
+      <div class="avatar">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="프로필 사진">
+          <defs>
+            <linearGradient id="avBg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#eef1ff"/><stop offset="1" stop-color="#e2e6ff"/>
+            </linearGradient>
+            <linearGradient id="avCloth" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#4d78fb"/><stop offset="1" stop-color="#7e3efc"/>
+            </linearGradient>
+          </defs>
+          <rect width="200" height="200" fill="url(#avBg)"/>
+          <path d="M40 200 C42 168 66 150 100 150 C134 150 158 168 160 200 Z" fill="url(#avCloth)"/>
+          <path d="M100 150 C86 150 74 156 66 165 C78 160 90 158 100 158 C110 158 122 160 134 165 C126 156 114 150 100 150 Z" fill="#ffffff" opacity="0.18"/>
+          <path d="M86 128 L86 146 C86 152 114 152 114 146 L114 128 Z" fill="#eab98f"/>
+          <path d="M86 128 L86 138 C90 143 110 143 114 138 L114 128 Z" fill="#dda87d" opacity="0.55"/>
+          <path d="M56 96 C56 58 74 40 100 40 C126 40 144 58 144 96 C144 116 140 128 136 138 C138 118 138 96 132 84 C130 110 128 120 124 128 L76 128 C72 120 70 110 68 84 C62 96 62 118 64 138 C60 128 56 116 56 96 Z" fill="#211d33"/>
+          <ellipse cx="61" cy="100" rx="8" ry="11" fill="#f6cfa9"/>
+          <ellipse cx="139" cy="100" rx="8" ry="11" fill="#f6cfa9"/>
+          <ellipse cx="61" cy="100" rx="3.4" ry="5.5" fill="#e3ad80"/>
+          <ellipse cx="139" cy="100" rx="3.4" ry="5.5" fill="#e3ad80"/>
+          <path d="M67 92 C67 66 82 52 100 52 C118 52 133 66 133 92 C133 114 118 130 100 130 C82 130 67 114 67 92 Z" fill="#f6cfa9"/>
+          <ellipse cx="80" cy="104" rx="8" ry="5" fill="#f2a98f" opacity="0.42"/>
+          <ellipse cx="120" cy="104" rx="8" ry="5" fill="#f2a98f" opacity="0.42"/>
+          <path d="M65 92 C63 62 80 46 100 46 C120 46 137 62 135 92 C135 84 132 78 128 74 C126 82 122 86 118 87 C120 80 119 74 116 71 C112 80 104 83 100 83 C96 83 88 80 84 71 C81 74 80 80 82 87 C78 86 74 82 72 74 C68 78 65 84 65 92 Z" fill="#211d33"/>
+          <path d="M76 88 C80 85 86 85 90 87" stroke="#2b2438" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+          <path d="M110 87 C114 85 120 85 124 88" stroke="#2b2438" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+          <path d="M77 97 C81 93 88 93 92 97 C88 100 81 100 77 97 Z" fill="#2b2438"/>
+          <path d="M108 97 C112 93 119 93 123 97 C119 100 112 100 108 97 Z" fill="#2b2438"/>
+          <circle cx="85.5" cy="96.4" r="1.4" fill="#ffffff" opacity="0.85"/>
+          <circle cx="116.5" cy="96.4" r="1.4" fill="#ffffff" opacity="0.85"/>
+          <path d="M99 100 C98 105 97 108 100 110 C102 109 103 107 102 104" stroke="#e3ad80" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M91 116 C96 121 104 121 109 116" stroke="#c96a5c" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="profile-info">
+        <p class="profile-name">김캠픽</p>
+        <p class="profile-dept">오산대학교 디지털콘텐츠디자인학과</p>
+        <span class="verified-badge">
+          <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:badge-check.svg');mask-image:url('https://api.iconify.design/iconoir:badge-check.svg');"></span>
+          학교 인증 완료
+        </span>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-item"><div class="stat-num">12</div><div class="stat-label">저장한 콘텐츠</div></div>
+      <div class="stat-item"><div class="stat-num">8</div><div class="stat-label">작성한 글</div></div>
+      <div class="stat-item"><div class="stat-num">34</div><div class="stat-label">참여한 활동</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>관심사 관리</h2><button class="link-btn">수정하기</button></div>
+    <div class="chip-wrap">
+      <span class="chip">디자인</span><span class="chip">공모전</span><span class="chip">스터디</span>
+      <span class="chip">앱디자인</span><span class="chip">UI/UX</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="verify-row">
+      <div class="verify-icon">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:graduation-cap.svg');mask-image:url('https://api.iconify.design/iconoir:graduation-cap.svg');"></span>
+      </div>
+      <div class="verify-text">
+        <b>학교 인증</b>
+        <span>오산대학교 (인증 완료)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">설정</div>
+  <div class="menu-list" id="menuList"></div>
+
+</div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="app-wrap" style="width:100%;">
+    <div style="display:flex;">
+      <a class="nav-item" href="home.html">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:home.svg');mask-image:url('https://api.iconify.design/iconoir:home.svg');"></span>
+        <span>홈</span>
+      </a>
+      <a class="nav-item" href="search.html">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:search.svg');mask-image:url('https://api.iconify.design/iconoir:search.svg');"></span>
+        <span>탐색</span>
+      </a>
+      <a class="nav-item" href="community.html">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:community.svg');mask-image:url('https://api.iconify.design/iconoir:community.svg');"></span>
+        <span>커뮤니티</span>
+      </a>
+      <a class="nav-item" href="save.html">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:bookmark.svg');mask-image:url('https://api.iconify.design/iconoir:bookmark.svg');"></span>
+        <span>저장</span>
+      </a>
+      <a class="nav-item active" href="mypage.html">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:profile-circle.svg');mask-image:url('https://api.iconify.design/iconoir:profile-circle.svg');"></span>
+        <span>마이페이지</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  function iconMask(name){ return `-webkit-mask-image:url('https://api.iconify.design/${name}.svg');mask-image:url('https://api.iconify.design/${name}.svg');`; }
+  const menu = [
+    { label:'알림 설정', icon:'iconoir:bell' },
+    { label:'고객센터', icon:'iconoir:headset-help' },
+    { label:'공지사항', icon:'iconoir:megaphone' },
+    { label:'개인정보 처리방침', icon:'iconoir:privacy-policy' },
+    { label:'이용약관', icon:'iconoir:page' },
+    { label:'로그아웃', icon:'iconoir:log-out', danger:true },
+  ];
+  document.getElementById('menuList').innerHTML = menu.map(m => `
+    <div class="menu-item ${m.danger?'danger':''}">
+      <div class="icon-box"><span class="icon" style="${iconMask(m.icon)}"></span></div>
+      <span class="label">${m.label}</span>
+      ${m.danger ? '' : `<span class="icon chev" style="${iconMask('iconoir:nav-arrow-right')}"></span>`}
+    </div>
+  `).join('');
+</script>
+
+</body>
+</html>

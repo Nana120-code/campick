@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>CamPick · 홈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+<style>
+  :root{
+    --color-bg:#fbfbfe; --color-surface:#ffffff; --color-title:#111111;
+    --color-body:#595e90; --color-muted:#9a9dc0; --color-border:rgba(89,94,144,0.14);
+    --color-accent:#4d31fc; --color-accent-2:#4732f7;
+    --grad-primary: linear-gradient(90deg,#3d70fb,#7e3efc);
+    --shadow-card: 0 2px 14px rgba(31,29,90,0.07);
+    --safe-top: env(safe-area-inset-top,0px);
+    --safe-bottom: env(safe-area-inset-bottom,0px);
+    --nav-h: 64px;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; background:var(--color-bg); }
+  body{ font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif; }
+  a{ text-decoration:none; color:inherit; }
+  button{ font-family:inherit; }
+
+  .icon{ display:inline-block; background-color:currentColor; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; flex-shrink:0; }
+
+  .app{ max-width:480px; margin:0 auto; min-height:100vh; min-height:100dvh; background:var(--color-bg); position:relative; padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px); }
+
+  /* ── 상단 바 ─────────────────────────────────────────── */
+  .topbar{ padding: calc(var(--safe-top) + 14px) 20px 10px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .school-pill{ display:flex; align-items:center; gap:6px; min-width:0; }
+  .school-pill .icon{ width:16px; height:20px; color:var(--color-accent); }
+  .school-pill span{ font-weight:600; font-size: clamp(14px, 3.8vw, 16px); color:var(--color-title); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 46vw; }
+  .school-pill .chev{ width:11px; height:7px; color:var(--color-body); opacity:.6; }
+  .bell-btn{ appearance:none; border:none; background:var(--color-surface); box-shadow:var(--shadow-card); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; flex-shrink:0; cursor:pointer; }
+  .bell-btn .icon{ width:19px; height:19px; color:var(--color-title); }
+  .bell-btn .dot{ position:absolute; top:9px; right:10px; width:7px; height:7px; border-radius:50%; background:#ff4d6d; border:1.5px solid var(--color-surface); }
+
+  /* ── 검색창 ──────────────────────────────────────────── */
+  .search-bar{ margin: 4px 20px 22px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:14px; padding: 13px 16px; display:flex; align-items:center; gap:10px; cursor:pointer; }
+  .search-bar .icon{ width:18px; height:18px; color:var(--color-muted); }
+  .search-bar span{ font-size: clamp(13px, 3.6vw, 14px); color:var(--color-muted); font-weight:500; }
+
+  /* ── 섹션 공통 ───────────────────────────────────────── */
+  .section{ padding: 6px 20px 0; }
+  .section-title{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .section-title h2{ margin:0; font-size: clamp(17px, 4.6vw, 19px); font-weight:800; color:var(--color-title); letter-spacing:-0.02em; }
+  .section-title .more{ font-size:12.5px; color:var(--color-muted); font-weight:600; cursor:pointer; }
+
+  /* ── 오늘의 PICK 배너 ────────────────────────────────── */
+  .pick-scroll{ display:flex; gap:12px; overflow-x:auto; padding: 0 20px 4px; margin: 0 -20px; scroll-snap-type:x mandatory; -ms-overflow-style:none; scrollbar-width:none; }
+  .pick-scroll::-webkit-scrollbar{ display:none; }
+  .pick-card{ scroll-snap-align:start; flex:0 0 auto; width: min(78vw, 320px); border-radius:18px; overflow:hidden; position:relative; box-shadow:var(--shadow-card); background-color:#3d70fb; background-image:linear-gradient(135deg,#3d70fb,#7e3efc); background-size:cover; background-position:center; background-repeat:no-repeat; aspect-ratio: 320/150; display:flex; align-items:flex-end; }
+  .pick-card::after{ content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.45) 100%); }
+  .pick-card .icon-wm{ position:absolute; right:14px; top:14px; width:56px; height:56px; color:rgba(255,255,255,0.28); }
+  .pick-card .pick-text{ position:relative; z-index:1; padding:16px; color:#fff; }
+  .pick-card .pick-tag{ font-size:11.5px; font-weight:700; opacity:.85; margin-bottom:4px; }
+  .pick-card .pick-title{ font-size: clamp(14px,4vw,16px); font-weight:800; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+  .pick-dots{ display:flex; justify-content:center; gap:6px; margin-top:12px; }
+  .pick-dots span{ width:6px; height:6px; border-radius:50%; background:var(--color-border); transition: background .25s ease, width .25s ease; }
+  .pick-dots span.active{ background:var(--color-accent-2); width:16px; border-radius:3px; }
+
+  /* ── 추천 리스트 카드 ────────────────────────────────── */
+  .list-card{ display:flex; align-items:center; gap:14px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:14px; box-shadow:var(--shadow-card); cursor:pointer; transition: transform .12s ease; }
+  .list-card:active{ transform: scale(0.98); }
+  .list-card + .list-card{ margin-top:12px; }
+  .thumb{ flex-shrink:0; width: clamp(64px,17vw,80px); height: clamp(64px,17vw,80px); border-radius:12px; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; }
+  .thumb .icon{ width:28px; height:28px; color:#fff; opacity:.9; }
+  .list-body{ min-width:0; flex:1; }
+  .list-title{ font-weight:700; font-size: clamp(14px,3.8vw,15.5px); color:var(--color-title); line-height:1.35; margin:0 0 8px; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; letter-spacing:-0.01em; }
+  .tag-row{ display:flex; align-items:center; gap:6px; margin-bottom:7px; flex-wrap:wrap; }
+  .tag{ font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; white-space:nowrap; }
+  .deadline{ font-size:11.5px; font-weight:600; color:var(--color-muted); }
+  .deadline.urgent{ color:#ef4444; }
+
+  /* ── 하단 고정 네비게이션 ────────────────────────────── */
+  .bottom-nav{ position:fixed; left:0; right:0; bottom:0; z-index:20; background:var(--color-surface); border-top:1px solid var(--color-border); display:flex; padding-bottom:var(--safe-bottom); box-shadow: 0 -4px 16px rgba(31,29,90,0.05); }
+  .app-wrap{ max-width:480px; margin:0 auto; position:relative; }
+  .nav-item{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:9px 4px 8px; color:var(--color-muted); cursor:pointer; }
+  .nav-item .icon{ width:22px; height:22px; }
+  .nav-item span{ font-size:10.5px; font-weight:600; }
+  .nav-item.active{ color:var(--color-accent-2); }
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+<div class="app">
+
+  <div class="topbar">
+    <div class="school-pill">
+      <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:map-pin.svg');mask-image:url('https://api.iconify.design/iconoir:map-pin.svg');"></span>
+      <span>오산대학교</span>
+      <span class="icon chev" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:nav-arrow-down.svg');mask-image:url('https://api.iconify.design/iconoir:nav-arrow-down.svg');"></span>
+    </div>
+    <button class="bell-btn" aria-label="알림">
+      <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:bell.svg');mask-image:url('https://api.iconify.design/iconoir:bell.svg');"></span>
+      <span class="dot"></span>
+    </button>
+  </div>
+
+  <div class="search-bar" onclick="location.href='search.html'">
+    <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:search.svg');mask-image:url('https://api.iconify.design/iconoir:search.svg');"></span>
+    <span>검색어를 입력하세요</span>
+  </div>
+
+  <section class="section">
+    <div class="section-title"><h2>오늘의 PICK</h2></div>
+    <div class="pick-scroll" id="pickScroll"></div>
+    <div class="pick-dots" id="pickDots"></div>
+  </section>
+
+  <section class="section" style="margin-top:26px;">
+    <div class="section-title">
+      <h2>관심사 기반 추천</h2>
+      <span class="more" onclick="location.href='search.html'">더보기</span>
+    </div>
+    <div id="recList"></div>
+  </section>
+
+</div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="app-wrap" style="width:100%;">
+    <div style="display:flex;">
+      <a class="nav-item active" href="home.html">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:home.svg');mask-image:url('https://api.iconify.design/iconoir:home.svg');"></span>
+        <span>홈</span>
+      </a>
+      <a class="nav-item" href="search.html">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:search.svg');mask-image:url('https://api.iconify.design/iconoir:search.svg');"></span>
+        <span>탐색</span>
+      </a>
+      <a class="nav-item" href="community.html">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:community.svg');mask-image:url('https://api.iconify.design/iconoir:community.svg');"></span>
+        <span>커뮤니티</span>
+      </a>
+      <a class="nav-item" href="save.html">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:bookmark.svg');mask-image:url('https://api.iconify.design/iconoir:bookmark.svg');"></span>
+        <span>저장</span>
+      </a>
+      <a class="nav-item" href="mypage.html">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:profile-circle.svg');mask-image:url('https://api.iconify.design/iconoir:profile-circle.svg');"></span>
+        <span>마이페이지</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // 카테고리별 색상 (칩 배경/텍스트) — 없는 카테고리는 기본값 사용
+  const TAG_COLORS = {
+    '디자인': {bg:'#f2ecff', fg:'#7c3aed'},
+    '공모전': {bg:'#eef0ff', fg:'#4338ca'},
+    'IT / 개발': {bg:'#e6f4ff', fg:'#2563eb'},
+    '스터디': {bg:'#e8fbf0', fg:'#059669'},
+    '여행': {bg:'#e6fbfb', fg:'#0891b2'},
+    '번개': {bg:'#fff1e6', fg:'#ea580c'},
+  };
+  const DEFAULT_TAG = {bg:'#f1f2fa', fg:'#595e90'};
+  function tagChip(label){
+    const c = TAG_COLORS[label] || DEFAULT_TAG;
+    return `<span class="tag" style="background:${c.bg};color:${c.fg};">${label}</span>`;
+  }
+  function iconMask(name){
+    return `-webkit-mask-image:url('https://api.iconify.design/${name}.svg');mask-image:url('https://api.iconify.design/${name}.svg');`;
+  }
+
+  // ── 오늘의 PICK 배너 ──
+  const picks = [
+    { tag:'교내 소식', title:'2026학년도 1학기 수강 정정 안내', icon:'iconoir:journal-page', img:'https://images.unsplash.com/photo-1741061966372-8e7e2c221de7?w=800&h=400&fit=crop&q=80' },
+    { tag:'추천 공모전', title:'전국 대학생 아이디어 공모전 대상 상금 500만원', icon:'iconoir:trophy', img:'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?w=800&h=400&fit=crop&q=80' },
+  ];
+  document.getElementById('pickScroll').innerHTML = picks.map(p => `
+    <div class="pick-card" style="background-image:url('${p.img}');">
+      <span class="icon icon-wm" style="${iconMask(p.icon)}"></span>
+      <div class="pick-text">
+        <div class="pick-tag">${p.tag}</div>
+        <div class="pick-title">${p.title}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // ── 오늘의 PICK 자동 슬라이드 모션 ──
+  const pickScroll = document.getElementById('pickScroll');
+  const pickDots = document.getElementById('pickDots');
+  pickDots.innerHTML = picks.map((_, i) => `<span class="${i===0?'active':''}"></span>`).join('');
+  const dotEls = pickDots.querySelectorAll('span');
+
+  let pickIndex = 0;
+  let autoTimer = null;
+
+  function cardStep(){
+    const card = pickScroll.querySelector('.pick-card');
+    return card ? card.getBoundingClientRect().width + 12 : pickScroll.clientWidth; // 12 = gap
+  }
+  function goToPick(i){
+    pickIndex = (i + picks.length) % picks.length;
+    pickScroll.scrollTo({ left: pickIndex * cardStep(), behavior:'smooth' });
+    dotEls.forEach((d, idx) => d.classList.toggle('active', idx === pickIndex));
+  }
+  function startAuto(){
+    stopAuto();
+    autoTimer = setInterval(() => goToPick(pickIndex + 1), 3500);
+  }
+  function stopAuto(){
+    if(autoTimer) clearInterval(autoTimer);
+  }
+  // 사용자가 직접 스크롤하면 현재 위치에 맞춰 점 동기화 + 잠시 자동재생 정지 후 재개
+  let scrollDebounce;
+  pickScroll.addEventListener('scroll', () => {
+    clearTimeout(scrollDebounce);
+    scrollDebounce = setTimeout(() => {
+      const idx = Math.round(pickScroll.scrollLeft / cardStep());
+      pickIndex = Math.max(0, Math.min(picks.length - 1, idx));
+      dotEls.forEach((d, i) => d.classList.toggle('active', i === pickIndex));
+    }, 80);
+  });
+  pickScroll.addEventListener('pointerdown', stopAuto);
+  pickScroll.addEventListener('pointerup', () => setTimeout(startAuto, 2000));
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    startAuto();
+  }
+
+  // ── 관심사 기반 추천 리스트 ──
+  const items = [
+    { tags:['디자인','공모전'], title:'2026 UI/UX 디자인 공모전', deadline:'~05.20 마감', urgent:false, icon:'iconoir:trophy', img:'https://images.unsplash.com/photo-1502810190503-8303352d0dd1?w=200&h=200&fit=crop&q=80' },
+    { tags:['IT / 개발','스터디'], title:'데이터 분석 스터디 모집', deadline:'~04.30 마감', urgent:true, icon:'iconoir:group', img:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=200&h=200&fit=crop&q=80' },
+    { tags:['여행','번개'], title:'제주도 2박 3일 번개 여행', deadline:'~05.10 마감', urgent:false, icon:'iconoir:map', img:'https://images.unsplash.com/photo-1628411848698-e3b3249a272a?w=200&h=200&fit=crop&q=80' },
+  ];
+  document.getElementById('recList').innerHTML = items.map(it => `
+    <div class="list-card" onclick="location.href='detail.html'">
+      <div class="thumb" style="background-image:url('${it.img}'); background-color:${(TAG_COLORS[it.tags[0]]||DEFAULT_TAG).fg};">
+        <span class="icon" style="${iconMask(it.icon)}"></span>
+      </div>
+      <div class="list-body">
+        <p class="list-title">${it.title}</p>
+        <div class="tag-row">${it.tags.map(tagChip).join('')}</div>
+        <div class="deadline ${it.urgent ? 'urgent' : ''}">${it.deadline}</div>
+      </div>
+    </div>
+  `).join('');
+</script>
+
+</body>
+</html>

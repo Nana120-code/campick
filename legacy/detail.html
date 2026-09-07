@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>CamPick · 상세보기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+<style>
+  :root{
+    --color-bg:#fbfbfe; --color-surface:#ffffff; --color-title:#111111;
+    --color-body:#595e90; --color-muted:#9a9dc0; --color-border:rgba(89,94,144,0.14);
+    --color-accent:#4d31fc; --color-accent-2:#4732f7;
+    --grad-primary: linear-gradient(90deg,#3d70fb,#7e3efc);
+    --shadow-card: 0 2px 14px rgba(31,29,90,0.07);
+    --safe-top: env(safe-area-inset-top,0px);
+    --safe-bottom: env(safe-area-inset-bottom,0px);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; background:var(--color-bg); }
+  body{ font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif; }
+  button{ font-family:inherit; }
+  .icon{ display:inline-block; background-color:currentColor; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; flex-shrink:0; }
+
+  .app{ max-width:480px; margin:0 auto; min-height:100vh; min-height:100dvh; background:var(--color-bg); position:relative; padding-bottom: calc(84px + var(--safe-bottom)); }
+
+  /* 히어로 이미지 */
+  .hero{ width:100%; aspect-ratio: 390/230; background: linear-gradient(135deg,#3d70fb,#7e3efc); background-size:cover; background-position:center; position:relative; }
+  .hero .icon-wm{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:64px; height:64px; color:rgba(255,255,255,0.35); }
+  .hero-topbar{ position:absolute; top:0; left:0; right:0; padding: calc(var(--safe-top) + 12px) 16px 0; display:flex; align-items:center; justify-content:space-between; }
+  .round-btn{ width:38px; height:38px; border-radius:50%; background:rgba(17,17,17,0.35); backdrop-filter: blur(6px); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .round-btn .icon{ width:19px; height:19px; color:#fff; }
+  .round-btn.saved{ background:rgba(255,255,255,0.9); }
+  .round-btn.saved .icon{ color:var(--color-accent-2); }
+
+  .content{ padding: 20px 20px 0; }
+  .cat-badge{ display:inline-block; font-size:12px; font-weight:700; padding:5px 11px; border-radius:8px; background:#eef0ff; color:#4338ca; margin-bottom:12px; }
+  h1.title{ margin:0 0 10px; font-size: clamp(20px,5.6vw,24px); font-weight:800; color:var(--color-title); line-height:1.35; letter-spacing:-0.02em; }
+  .title-meta{ display:flex; align-items:center; gap:10px; margin-bottom:24px; }
+  .deadline{ font-size:13px; font-weight:700; color:#ef4444; }
+  .dot-sep{ width:3px; height:3px; border-radius:50%; background:var(--color-border); }
+  .subtag{ font-size:13px; font-weight:600; color:var(--color-body); }
+
+  /* 정보 그리드 */
+  .info-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:18px; box-shadow:var(--shadow-card); margin-bottom:26px; }
+  .info-item{ display:flex; align-items:flex-start; gap:10px; }
+  .info-item .icon-box{ width:30px; height:30px; border-radius:8px; background:#f1f2fa; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .info-item .icon-box .icon{ width:15px; height:15px; color:var(--color-accent-2); }
+  .info-item .info-text{ min-width:0; }
+  .info-item .info-label{ font-size:11.5px; color:var(--color-muted); font-weight:600; margin-bottom:3px; }
+  .info-item .info-value{ font-size:13px; color:var(--color-title); font-weight:700; line-height:1.35; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+
+  .section{ margin-bottom:26px; }
+  .section h2{ margin:0 0 12px; font-size:16.5px; font-weight:800; color:var(--color-title); letter-spacing:-0.01em; }
+  .section p.desc{ margin:0; font-size:14px; line-height:1.65; color:var(--color-body); }
+
+  .hashtag-row{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:26px; }
+  .hashtag{ font-size:12.5px; font-weight:700; color:var(--color-accent-2); background:#f2ecff; padding:6px 12px; border-radius:999px; }
+
+  .period-card{ display:flex; align-items:center; gap:12px; background:#f8f8fd; border-radius:14px; padding:16px; margin-bottom:8px; }
+  .period-card .icon-box{ width:36px; height:36px; border-radius:10px; background:var(--color-surface); box-shadow:var(--shadow-card); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .period-card .icon-box .icon{ width:17px; height:17px; color:var(--color-accent-2); }
+  .period-card .p-label{ font-size:11.5px; color:var(--color-muted); font-weight:600; margin-bottom:3px; }
+  .period-card .p-value{ font-size:13.5px; color:var(--color-title); font-weight:700; }
+
+  .cta-wrap{ position:fixed; left:0; right:0; bottom:0; z-index:20; background:var(--color-surface); border-top:1px solid var(--color-border); padding: 12px 20px calc(12px + var(--safe-bottom)); }
+  .cta-inner{ max-width:480px; margin:0 auto; }
+  .cta-btn{ width:100%; border:none; border-radius:14px; background:var(--grad-primary); color:#fff; font-weight:700; font-size:16px; padding:16px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="hero" style="background-image:url('https://images.unsplash.com/photo-1602576666092-bf6447a729fc?w=900&h=530&fit=crop&q=80');">
+    <span class="icon icon-wm" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:trophy.svg');mask-image:url('https://api.iconify.design/iconoir:trophy.svg');"></span>
+    <div class="hero-topbar">
+      <button class="round-btn" onclick="history.back()" aria-label="뒤로가기">
+        <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:nav-arrow-left.svg');mask-image:url('https://api.iconify.design/iconoir:nav-arrow-left.svg');"></span>
+      </button>
+      <button class="round-btn" id="saveBtn" onclick="toggleSave()" aria-label="저장">
+        <span class="icon" id="saveIcon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:bookmark.svg');mask-image:url('https://api.iconify.design/iconoir:bookmark.svg');"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <span class="cat-badge">공모전</span>
+    <h1 class="title">2026 UI/UX 디자인 공모전</h1>
+    <div class="title-meta">
+      <span class="deadline">~05.20 마감</span>
+      <span class="dot-sep"></span>
+      <span class="subtag">디자인</span>
+    </div>
+
+    <div class="info-grid" id="infoGrid"></div>
+
+    <div class="section">
+      <h2>상세 소개</h2>
+      <p class="desc">사용자 경험을 혁신할 수 있는 창의적인<br>UI/UX 디자인을 기다립니다.</p>
+    </div>
+
+    <div class="hashtag-row" id="hashtags"></div>
+
+    <div class="section">
+      <h2>접수 기간</h2>
+      <div class="period-card">
+        <div class="icon-box"><span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:calendar.svg');mask-image:url('https://api.iconify.design/iconoir:calendar.svg');"></span></div>
+        <div>
+          <div class="p-label">접수 기간</div>
+          <div class="p-value">2026.04.01(수) ~ 2026.05.20(수) 23:59</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="cta-wrap">
+  <div class="cta-inner">
+    <button class="cta-btn" onclick="alert('접수 페이지로 연결됩니다. (연동 예정)')">접수하러 가기</button>
+  </div>
+</div>
+
+<script>
+  function iconMask(name){ return `-webkit-mask-image:url('https://api.iconify.design/${name}.svg');mask-image:url('https://api.iconify.design/${name}.svg');`; }
+
+  const info = [
+    { label:'주최', value:'한국디자인진흥원', icon:'iconoir:building' },
+    { label:'참가대상', value:'전국 대학(원)생', icon:'iconoir:group' },
+    { label:'접수방법', value:'홈페이지 접수', icon:'iconoir:send' },
+    { label:'시상내역', value:'총 상금 1,000만원', icon:'iconoir:trophy' },
+  ];
+  document.getElementById('infoGrid').innerHTML = info.map(i => `
+    <div class="info-item">
+      <div class="icon-box"><span class="icon" style="${iconMask(i.icon)}"></span></div>
+      <div class="info-text">
+        <div class="info-label">${i.label}</div>
+        <div class="info-value">${i.value}</div>
+      </div>
+    </div>
+  `).join('');
+
+  const tags = ['#UIUX','#디자인','#아이디어','#공모전'];
+  document.getElementById('hashtags').innerHTML = tags.map(t => `<span class="hashtag">${t}</span>`).join('');
+
+  let saved = false;
+  function toggleSave(){
+    saved = !saved;
+    document.getElementById('saveBtn').classList.toggle('saved', saved);
+    document.getElementById('saveIcon').style.cssText = iconMask(saved ? 'iconoir:bookmark-solid' : 'iconoir:bookmark');
+  }
+</script>
+
+</body>
+</html>

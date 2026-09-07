@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>CamPick · 글쓰기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+<style>
+  :root{
+    --color-bg:#fbfbfe; --color-surface:#ffffff; --color-title:#111111;
+    --color-body:#595e90; --color-muted:#9a9dc0; --color-border:rgba(89,94,144,0.14);
+    --color-accent:#4d31fc; --color-accent-2:#4732f7;
+    --grad-primary: linear-gradient(90deg,#3d70fb,#7e3efc);
+    --shadow-card: 0 2px 14px rgba(31,29,90,0.07);
+    --safe-top: env(safe-area-inset-top,0px);
+    --safe-bottom: env(safe-area-inset-bottom,0px);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; background:var(--color-bg); }
+  body{ font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif; }
+  button,input,textarea{ font-family:inherit; }
+  .icon{ display:inline-block; background-color:currentColor; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; flex-shrink:0; }
+
+  .app{ max-width:480px; margin:0 auto; min-height:100vh; min-height:100dvh; background:var(--color-bg); position:relative; padding-bottom: calc(90px + var(--safe-bottom)); }
+
+  /* 상단바 */
+  .topbar{ position:sticky; top:0; z-index:10; background:var(--color-bg); padding: calc(var(--safe-top) + 12px) 8px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--color-border); }
+  .topbar h1{ margin:0; font-size:16.5px; font-weight:800; color:var(--color-title); letter-spacing:-0.02em; }
+  .round-btn{ appearance:none; width:38px; height:38px; border-radius:50%; background:transparent; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--color-title); transition: background .15s ease, transform .1s ease; }
+  .round-btn:hover{ background: rgba(89,94,144,0.08); }
+  .round-btn:active{ transform: scale(0.92); }
+  .round-btn .icon{ width:20px; height:20px; }
+  .topbar .spacer{ width:38px; height:38px; }
+
+  /* 폼 */
+  .form-wrap{ padding: 18px 20px 0; }
+  .field-group{ margin-bottom:22px; }
+  .field-label{ display:block; font-size:12.5px; font-weight:700; color:var(--color-body); margin-bottom:10px; }
+
+  .category-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .category-chip{ appearance:none; cursor:pointer; border:1.5px solid var(--color-border); background:var(--color-surface); color:var(--color-body); font-size:13px; font-weight:700; padding:9px 15px; border-radius:999px; transition: border-color .15s ease, background .15s ease, color .15s ease, transform .1s ease; }
+  .category-chip:active{ transform: scale(0.96); }
+  .category-chip.selected{ border-color: var(--cat-color, var(--color-accent-2)); background: var(--cat-bg, rgba(71,50,247,0.08)); color: var(--cat-color, var(--color-accent-2)); }
+
+  .title-input{ width:100%; border:none; border-bottom:1.5px solid var(--color-border); outline:none; background:transparent; padding:8px 2px 12px; font-size:17px; font-weight:700; color:var(--color-title); letter-spacing:-0.01em; transition: border-color .15s ease; }
+  .title-input::placeholder{ color:var(--color-muted); font-weight:600; }
+  .title-input:focus{ border-color:var(--color-accent-2); }
+
+  .content-input{ width:100%; min-height:180px; resize:none; border:none; outline:none; background:transparent; padding:2px; font-size:14.5px; line-height:1.65; color:var(--color-title); }
+  .content-input::placeholder{ color:var(--color-muted); }
+
+  .char-count{ display:block; text-align:right; font-size:11.5px; color:var(--color-muted); font-weight:600; margin-top:6px; }
+  .char-count.limit{ color:#ef4444; }
+
+  .photo-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .photo-add{ appearance:none; cursor:pointer; width:72px; height:72px; border-radius:14px; border:1.5px dashed var(--color-border); background:var(--color-surface); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--color-muted); transition: border-color .15s ease, transform .1s ease; flex-shrink:0; }
+  .photo-add:active{ transform: scale(0.95); }
+  .photo-add .icon{ width:18px; height:18px; }
+  .photo-add span{ font-size:10.5px; font-weight:700; }
+  .photo-add:disabled{ opacity:.4; cursor:not-allowed; }
+  .photo-thumb{ position:relative; width:72px; height:72px; border-radius:14px; overflow:hidden; flex-shrink:0; box-shadow:var(--shadow-card); }
+  .photo-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-thumb .remove{ position:absolute; top:3px; right:3px; width:19px; height:19px; border-radius:50%; background:rgba(17,17,17,0.55); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .photo-thumb .remove .icon{ width:9px; height:9px; background-color:#fff; }
+
+  /* 하단 CTA */
+  .cta-wrap{ position:fixed; left:0; right:0; bottom:0; z-index:20; background:var(--color-surface); border-top:1px solid var(--color-border); padding: 12px 20px calc(12px + var(--safe-bottom)); }
+  .cta-inner{ max-width:480px; margin:0 auto; }
+  .cta-btn{ width:100%; border:none; border-radius:14px; background:var(--grad-primary); color:#fff; font-weight:700; font-size:16px; padding:16px; cursor:pointer; transition: transform .1s ease, opacity .2s ease, filter .15s ease; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .cta-btn:active{ transform: scale(0.98); }
+  .cta-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .spinner{ width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; animation: spin .7s linear infinite; display:none; }
+  .cta-btn.loading .spinner{ display:inline-block; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  /* 토스트 */
+  .toast{ position:fixed; left:50%; bottom: calc(96px + var(--safe-bottom)); transform: translateX(-50%) translateY(10px); background:#111111; color:#fff; font-size:13.5px; font-weight:600; padding:12px 20px; border-radius:999px; box-shadow:0 8px 20px rgba(17,17,17,0.25); opacity:0; pointer-events:none; transition: opacity .25s ease, transform .25s ease; z-index:30; display:flex; align-items:center; gap:7px; white-space:nowrap; }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+  .toast .icon{ width:15px; height:15px; background-color:#4ade80; flex-shrink:0; }
+
+  @media (prefers-reduced-motion: reduce){
+    .category-chip, .round-btn, .cta-btn, .toast, .photo-add{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <button class="round-btn" id="backBtn" aria-label="뒤로가기">
+      <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:nav-arrow-left.svg');mask-image:url('https://api.iconify.design/iconoir:nav-arrow-left.svg');"></span>
+    </button>
+    <h1>글쓰기</h1>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="form-wrap">
+    <div class="field-group">
+      <span class="field-label">카테고리</span>
+      <div class="category-row" id="categoryRow"></div>
+    </div>
+
+    <div class="field-group">
+      <input id="titleInput" class="title-input" placeholder="제목을 입력해주세요" maxlength="50" />
+      <span class="char-count" id="titleCount">0/50</span>
+    </div>
+
+    <div class="field-group">
+      <textarea id="contentInput" class="content-input" placeholder="자유롭게 이야기를 나눠보세요" maxlength="1000"></textarea>
+      <span class="char-count" id="contentCount">0/1000</span>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">사진 첨부 <span id="photoCount">(0/5)</span></span>
+      <div class="photo-row" id="photoRow">
+        <button type="button" class="photo-add" id="photoAddBtn" aria-label="사진 추가">
+          <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:camera.svg');mask-image:url('https://api.iconify.design/iconoir:camera.svg');"></span>
+          <span>추가</span>
+        </button>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" multiple hidden />
+    </div>
+  </div>
+
+</div>
+
+<div class="cta-wrap">
+  <div class="cta-inner">
+    <button class="cta-btn" id="submitBtn" disabled>
+      <span class="spinner"></span>
+      <span id="submitLabel">등록하기</span>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span class="icon" style="-webkit-mask-image:url('https://api.iconify.design/iconoir:check-circle.svg');mask-image:url('https://api.iconify.design/iconoir:check-circle.svg');"></span>
+  게시글이 등록되었습니다
+</div>
+
+<script src="js/posts.js"></script>
+<script>
+  function iconMask(name){ return `-webkit-mask-image:url('https://api.iconify.design/${name}.svg');mask-image:url('https://api.iconify.design/${name}.svg');`; }
+
+  let selectedCategory = null;
+  const categoryRow = document.getElementById('categoryRow');
+  categoryRow.innerHTML = POST_CATEGORIES.map(c => `<button type="button" class="category-chip" data-label="${c.label}" style="--cat-color:${c.fg};--cat-bg:${c.bg};">${c.label}</button>`).join('');
+  categoryRow.querySelectorAll('.category-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      categoryRow.querySelectorAll('.category-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      selectedCategory = chip.dataset.label;
+      validate();
+    });
+  });
+
+  const titleInput = document.getElementById('titleInput');
+  const titleCount = document.getElementById('titleCount');
+  titleInput.addEventListener('input', () => {
+    titleCount.textContent = `${titleInput.value.length}/50`;
+    titleCount.classList.toggle('limit', titleInput.value.length >= 50);
+    validate();
+  });
+
+  const contentInput = document.getElementById('contentInput');
+  const contentCount = document.getElementById('contentCount');
+  contentInput.addEventListener('input', () => {
+    contentCount.textContent = `${contentInput.value.length}/1000`;
+    contentCount.classList.toggle('limit', contentInput.value.length >= 1000);
+    validate();
+  });
+
+  let photos = [];
+  const photoRow = document.getElementById('photoRow');
+  const photoAddBtn = document.getElementById('photoAddBtn');
+  const photoInput = document.getElementById('photoInput');
+  const photoCount = document.getElementById('photoCount');
+
+  photoAddBtn.addEventListener('click', () => photoInput.click());
+  photoInput.addEventListener('change', async () => {
+    const files = Array.from(photoInput.files).slice(0, MAX_PHOTOS - photos.length);
+    photoInput.value = '';
+    for(const file of files){
+      try{
+        photos.push(await downscaleImage(file));
+        renderPhotos();
+      }catch(e){ /* 읽을 수 없는 파일은 건너뛴다 */ }
+    }
+  });
+
+  function renderPhotos(){
+    photoRow.querySelectorAll('.photo-thumb').forEach(el => el.remove());
+    photos.forEach((src, i) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'photo-thumb';
+      thumb.innerHTML = `<img src="${src}" alt="첨부 사진 ${i+1}"><button type="button" class="remove" data-idx="${i}" aria-label="사진 삭제"><span class="icon" style="${iconMask('iconoir:xmark')}"></span></button>`;
+      photoRow.insertBefore(thumb, photoAddBtn);
+    });
+    photoCount.textContent = `(${photos.length}/${MAX_PHOTOS})`;
+    photoAddBtn.disabled = photos.length >= MAX_PHOTOS;
+    photoRow.querySelectorAll('.remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        photos.splice(Number(btn.dataset.idx), 1);
+        renderPhotos();
+      });
+    });
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
+  const submitLabel = document.getElementById('submitLabel');
+
+  function validate(){
+    submitBtn.disabled = !selectedCategory || !titleInput.value.trim() || !contentInput.value.trim();
+  }
+
+  submitBtn.addEventListener('click', () => {
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+    submitLabel.textContent = '등록 중...';
+
+    const ok = savePost({
+      id: 'p' + Date.now(),
+      category: selectedCategory,
+      title: titleInput.value.trim(),
+      content: contentInput.value.trim(),
+      photos: photos.slice(),
+      createdAt: Date.now(),
+    });
+
+    if(!ok){
+      submitBtn.classList.remove('loading');
+      submitLabel.textContent = '등록하기';
+      submitBtn.disabled = false;
+      alert('저장 공간이 부족해 글을 등록하지 못했습니다.');
+      return;
+    }
+
+    setTimeout(() => {
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => { location.href = 'community.html'; }, 900);
+    }, 600);
+  });
+
+  function isDirty(){
+    return titleInput.value.trim().length > 0 || contentInput.value.trim().length > 0 || photos.length > 0 || !!selectedCategory;
+  }
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    if(isDirty() && !confirm('작성 중인 내용이 사라집니다. 나가시겠습니까?')) return;
+    if(history.length > 1) history.back();
+    else location.href = 'community.html';
+  });
+</script>
+
+</body>
+</html>
