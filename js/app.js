@@ -287,6 +287,17 @@ function tagChip(label){
 const DATE_LOCALE = { ko:'ko-KR', en:'en-US', zh:'zh-CN', ja:'ja-JP' };
 function postDate(ts){ return formatPostDate(ts, DATE_LOCALE[currentLang] || 'ko-KR'); }
 
+/* '~05.20' 같은 마감일을 접수 기간 문구로 바꾼다 (접수 시작은 마감 45일 전으로 둔다) */
+function periodText(deadline){
+  const m = /(\d{2})\.(\d{2})/.exec(deadline || '');
+  if(!m) return '';
+  const end = new Date(new Date().getFullYear(), Number(m[1]) - 1, Number(m[2]));
+  const start = new Date(end.getTime() - 45 * 86400000);
+  const loc = DATE_LOCALE[currentLang] || 'ko-KR';
+  const fmt = d => d.toLocaleDateString(loc, { year:'numeric', month:'2-digit', day:'2-digit', weekday:'short' });
+  return fmt(start) + ' ~ ' + fmt(end) + ' 23:59';
+}
+
 function renderBottomNav(active){
   const items = [
     { key:'home',      icon:'iconoir:home' },
@@ -683,7 +694,7 @@ const ViewHome = {
       : '';
 
     APP.querySelector('#recList').innerHTML = items.map(it => `
-      <div class="list-card" data-route="#/detail">
+      <div class="list-card" data-route="#/detail/${it.id}">
         <div class="thumb" style="background-image:url('${it.img}'); background-color:${(TAG_COLORS[it.tags[0]]||DEFAULT_TAG).fg};">
           <span class="icon" style="${iconMask(it.icon)}"></span>
         </div>
@@ -746,7 +757,7 @@ const ViewSearch = {
 
     const results = pickContents(['korea-design','data-study','esg-hack']);
     APP.querySelector('#resultList').innerHTML = results.map(r => `
-      <div class="card" data-route="#/detail">
+      <div class="card" data-route="#/detail/${r.id}">
         <div class="tag-row">${r.tags.map(tagChip).join('<span class="sep">ㅣ</span>')}</div>
         <p class="card-title">${ct(r.title)}</p>
         <p class="card-desc">${ct(r.desc)}</p>
@@ -842,35 +853,35 @@ const COMM_AUTHORS = [
 
 /* 커뮤니티별 샘플 게시글 — hours는 '몇 시간 전'에 쓰인다 */
 const COMM_POSTS = [
-  { community:'school', author:0, hours:2,  like:24, comment:11, title:{ko:'중앙도서관 시험기간 자리 상황 공유해요',en:'Sharing library seat availability during finals',zh:'分享考试期间中央图书馆座位情况',ja:'中央図書館の試験期間の座席状況を共有します'} },
-  { community:'school', author:2, hours:7,  like:18, comment:9,  title:{ko:'이번 학기 교양 추천 좀 부탁드려요',en:'Any recommendations for electives this term?',zh:'求推荐这学期的通识课',ja:'今学期の教養科目のおすすめを教えてください'} },
-  { community:'school', author:1, hours:26, like:31, comment:14, title:{ko:'학교 축제 부스 운영 후기',en:'Recap of running a festival booth',zh:'校庆摆摊经营后记',ja:'学園祭ブース運営のレビュー'} },
-  { community:'it',     author:3, hours:1,  like:12, comment:5,  title:{ko:'알고리즘 스터디 같이 하실 분 계신가요',en:'Anyone up for an algorithm study group?',zh:'有人一起参加算法学习小组吗',ja:'アルゴリズムスタディを一緒にやりませんか'} },
-  { community:'it',     author:0, hours:9,  like:27, comment:16, title:{ko:'첫 백엔드 인턴 면접 후기 남깁니다',en:'Notes from my first backend internship interview',zh:'第一次后端实习面试后记',ja:'初めてのバックエンドインターン面接のレビュー'} },
-  { community:'it',     author:2, hours:30, like:15, comment:4,  title:{ko:'해커톤 팀 구성할 때 뭘 먼저 정하나요?',en:'What do you decide first when forming a hackathon team?',zh:'组黑客松队伍时先定什么？',ja:'ハッカソンのチーム編成で最初に決めることは？'} },
-  { community:'design', author:1, hours:3,  like:22, comment:8,  title:{ko:'졸업작품 준비 팀 공유합니다!',en:'Sharing our capstone project team!',zh:'分享我们的毕业设计团队！',ja:'卒業作品準備チームをシェアします！'} },
-  { community:'design', author:3, hours:12, like:19, comment:7,  title:{ko:'포트폴리오 첫 장 어떻게 구성하셨어요?',en:'How did you lay out your portfolio cover?',zh:'作品集第一页你们怎么排的？',ja:'ポートフォリオの1ページ目はどう構成しましたか？'} },
-  { community:'contest',author:0, hours:5,  like:33, comment:12, title:{ko:'공모전 수상 후 상금 지급까지 얼마나 걸렸나요',en:'How long until prize money arrives after winning?',zh:'获奖后奖金多久到账？',ja:'受賞後、賞金の支払いまでどれくらいかかりましたか'} },
-  { community:'contest',author:2, hours:20, like:16, comment:6,  title:{ko:'서류 탈락만 세 번째인데 조언 구합니다',en:'Rejected at the document stage three times — advice?',zh:'已经三次书面落选，求建议',ja:'書類選考で3回落ちました。アドバイスをください'} },
-  { community:'study',  author:1, hours:4,  like:14, comment:10, title:{ko:'토익 스터디 인원 두 자리 남았어요',en:'Two spots left in our TOEIC study group',zh:'托业学习小组还剩两个名额',ja:'TOEICスタディ、残り2席です'} },
-  { community:'study',  author:3, hours:33, like:11, comment:3,  title:{ko:'스터디 벌금 제도 효과 있나요?',en:'Do study-group penalty fees actually work?',zh:'学习小组的罚款制度有用吗？',ja:'スタディの罰金制度は効果ありますか？'} },
-  { community:'startup',author:2, hours:6,  like:20, comment:9,  title:{ko:'교내 창업지원단 상담 받아봤습니다',en:'I visited the campus startup support center',zh:'去了校内创业支援团咨询',ja:'学内の起業支援団に相談してきました'} },
-  { community:'photo',  author:0, hours:8,  like:25, comment:5,  title:{ko:'교정 야경 찍기 좋은 자리 추천',en:'Best spots for campus night photography',zh:'推荐校园夜景拍摄地点',ja:'キャンパスの夜景撮影におすすめの場所'} },
-  { community:'music',  author:1, hours:15, like:13, comment:6,  title:{ko:'합주실 예약 어떻게 하시나요',en:'How do you book the practice room?',zh:'合奏室怎么预约？',ja:'リハーサル室の予約はどうしていますか'} },
-  { community:'travelcamp',author:3,hours:11,like:17, comment:8, title:{ko:'2박 3일 제주 예산 짜봤어요',en:'Budget plan for a 3-day Jeju trip',zh:'做了济州三天两夜的预算',ja:'2泊3日の済州島の予算を組んでみました'} },
-  { community:'marketing',author:2,hours:18,like:12, comment:4,  title:{ko:'서포터즈 활동 시간 얼마나 드나요',en:'How much time do supporter programs take?',zh:'支持者活动要花多少时间？',ja:'サポーターズ活動はどのくらい時間がかかりますか'} },
-  { community:'media',  author:0, hours:22, like:10, comment:3,  title:{ko:'편집 프로그램 뭐 쓰시나요',en:'Which editing software do you use?',zh:'你们用什么剪辑软件？',ja:'編集ソフトは何を使っていますか'} },
+  { id:'cp01', community:'school', author:0, hours:2,  like:24, comment:11, title:{ko:'중앙도서관 시험기간 자리 상황 공유해요',en:'Sharing library seat availability during finals',zh:'分享考试期间中央图书馆座位情况',ja:'中央図書館の試験期間の座席状況を共有します'} },
+  { id:'cp02', community:'school', author:2, hours:7,  like:18, comment:9,  title:{ko:'이번 학기 교양 추천 좀 부탁드려요',en:'Any recommendations for electives this term?',zh:'求推荐这学期的通识课',ja:'今学期の教養科目のおすすめを教えてください'} },
+  { id:'cp03', community:'school', author:1, hours:26, like:31, comment:14, title:{ko:'학교 축제 부스 운영 후기',en:'Recap of running a festival booth',zh:'校庆摆摊经营后记',ja:'学園祭ブース運営のレビュー'} },
+  { id:'cp04', community:'it',     author:3, hours:1,  like:12, comment:5,  title:{ko:'알고리즘 스터디 같이 하실 분 계신가요',en:'Anyone up for an algorithm study group?',zh:'有人一起参加算法学习小组吗',ja:'アルゴリズムスタディを一緒にやりませんか'} },
+  { id:'cp05', community:'it',     author:0, hours:9,  like:27, comment:16, title:{ko:'첫 백엔드 인턴 면접 후기 남깁니다',en:'Notes from my first backend internship interview',zh:'第一次后端实习面试后记',ja:'初めてのバックエンドインターン面接のレビュー'} },
+  { id:'cp06', community:'it',     author:2, hours:30, like:15, comment:4,  title:{ko:'해커톤 팀 구성할 때 뭘 먼저 정하나요?',en:'What do you decide first when forming a hackathon team?',zh:'组黑客松队伍时先定什么？',ja:'ハッカソンのチーム編成で最初に決めることは？'} },
+  { id:'cp07', community:'design', author:1, hours:3,  like:22, comment:8,  title:{ko:'졸업작품 준비 팀 공유합니다!',en:'Sharing our capstone project team!',zh:'分享我们的毕业设计团队！',ja:'卒業作品準備チームをシェアします！'} },
+  { id:'cp08', community:'design', author:3, hours:12, like:19, comment:7,  title:{ko:'포트폴리오 첫 장 어떻게 구성하셨어요?',en:'How did you lay out your portfolio cover?',zh:'作品集第一页你们怎么排的？',ja:'ポートフォリオの1ページ目はどう構成しましたか？'} },
+  { id:'cp09', community:'contest',author:0, hours:5,  like:33, comment:12, title:{ko:'공모전 수상 후 상금 지급까지 얼마나 걸렸나요',en:'How long until prize money arrives after winning?',zh:'获奖后奖金多久到账？',ja:'受賞後、賞金の支払いまでどれくらいかかりましたか'} },
+  { id:'cp10', community:'contest',author:2, hours:20, like:16, comment:6,  title:{ko:'서류 탈락만 세 번째인데 조언 구합니다',en:'Rejected at the document stage three times — advice?',zh:'已经三次书面落选，求建议',ja:'書類選考で3回落ちました。アドバイスをください'} },
+  { id:'cp11', community:'study',  author:1, hours:4,  like:14, comment:10, title:{ko:'토익 스터디 인원 두 자리 남았어요',en:'Two spots left in our TOEIC study group',zh:'托业学习小组还剩两个名额',ja:'TOEICスタディ、残り2席です'} },
+  { id:'cp12', community:'study',  author:3, hours:33, like:11, comment:3,  title:{ko:'스터디 벌금 제도 효과 있나요?',en:'Do study-group penalty fees actually work?',zh:'学习小组的罚款制度有用吗？',ja:'スタディの罰金制度は効果ありますか？'} },
+  { id:'cp13', community:'startup',author:2, hours:6,  like:20, comment:9,  title:{ko:'교내 창업지원단 상담 받아봤습니다',en:'I visited the campus startup support center',zh:'去了校内创业支援团咨询',ja:'学内の起業支援団に相談してきました'} },
+  { id:'cp14', community:'photo',  author:0, hours:8,  like:25, comment:5,  title:{ko:'교정 야경 찍기 좋은 자리 추천',en:'Best spots for campus night photography',zh:'推荐校园夜景拍摄地点',ja:'キャンパスの夜景撮影におすすめの場所'} },
+  { id:'cp15', community:'music',  author:1, hours:15, like:13, comment:6,  title:{ko:'합주실 예약 어떻게 하시나요',en:'How do you book the practice room?',zh:'合奏室怎么预约？',ja:'リハーサル室の予約はどうしていますか'} },
+  { id:'cp16', community:'travelcamp',author:3,hours:11,like:17, comment:8, title:{ko:'2박 3일 제주 예산 짜봤어요',en:'Budget plan for a 3-day Jeju trip',zh:'做了济州三天两夜的预算',ja:'2泊3日の済州島の予算を組んでみました'} },
+  { id:'cp17', community:'marketing',author:2,hours:18,like:12, comment:4,  title:{ko:'서포터즈 활동 시간 얼마나 드나요',en:'How much time do supporter programs take?',zh:'支持者活动要花多少时间？',ja:'サポーターズ活動はどのくらい時間がかかりますか'} },
+  { id:'cp18', community:'media',  author:0, hours:22, like:10, comment:3,  title:{ko:'편집 프로그램 뭐 쓰시나요',en:'Which editing software do you use?',zh:'你们用什么剪辑软件？',ja:'編集ソフトは何を使っていますか'} },
 ];
 
 /* 커뮤니티별 모집글 */
 const COMM_RECRUITS = [
-  { community:'it',      tag:'스터디',   cur:3, max:5,  org:{ko:'IT/개발 · 서울',en:'IT/Dev · Seoul',zh:'IT/开发 · 首尔',ja:'IT/開発 · ソウル'},      title:{ko:'프론트엔드 스터디 팀원 모집',en:'Frontend Study Group Members Wanted',zh:'招募前端学习小组成员',ja:'フロントエンドスタディメンバー募集'} },
-  { community:'it',      tag:'해커톤',   cur:2, max:4,  org:{ko:'IT/개발 · 전국',en:'IT/Dev · Nationwide',zh:'IT/开发 · 全国',ja:'IT/開発 · 全国'},     title:{ko:'ESG 해커톤 같이 나갈 팀원 구해요',en:'Looking for teammates for the ESG hackathon',zh:'招募一起参加ESG黑客松的队友',ja:'ESGハッカソンに一緒に出るメンバー募集'} },
-  { community:'design',  tag:'프로젝트', cur:2, max:4,  org:{ko:'기획 · 오산대',en:'Planning · Osan Univ.',zh:'企划 · 乌山大学',ja:'企画 · 烏山大'},      title:{ko:'앱 서비스 기획 프로젝트 팀원 구해요!',en:'Looking for App Planning Project Members!',zh:'招募App服务企划项目成员！',ja:'アプリサービス企画プロジェクトメンバー募集！'} },
-  { community:'marketing',tag:'대외활동',cur:5, max:10, org:{ko:'마케팅 · 전국',en:'Marketing · Nationwide',zh:'市场营销 · 全国',ja:'マーケティング · 全国'}, title:{ko:'대학생 마케팅 서포터즈 15기 모집',en:'15th College Marketing Supporters',zh:'第15期大学生市场营销支持者招募',ja:'大学生マーケティングサポーターズ15期募集'} },
-  { community:'study',   tag:'스터디',   cur:4, max:6,  org:{ko:'어학 · 오산대',en:'Language · Osan Univ.',zh:'语言 · 乌山大学',ja:'語学 · 烏山大'},      title:{ko:'토익 900점 목표 스터디원 모집',en:'TOEIC 900 target study group',zh:'招募托业900分目标学习小组',ja:'TOEIC900点目標スタディメンバー募集'} },
-  { community:'school',  tag:'행사',     cur:8, max:15, org:{ko:'교내 · 오산대',en:'On campus · Osan Univ.',zh:'校内 · 乌山大学',ja:'学内 · 烏山大'},     title:{ko:'교내 체육대회 학과 대표팀 모집',en:'Department team for the campus sports day',zh:'招募校内运动会学科代表队',ja:'学内体育大会の学科代表チーム募集'} },
-  { community:'travelcamp',tag:'번개',   cur:3, max:6,  org:{ko:'여행 · 제주',en:'Travel · Jeju',zh:'旅行 · 济州',ja:'旅行 · 済州'},                    title:{ko:'제주도 2박 3일 번개 여행 인원 모집',en:'Jeju 3-day meetup trip — join us',zh:'招募济州岛3天2夜快闪旅行成员',ja:'済州島2泊3日突発旅行メンバー募集'} },
+  { id:'cr01', community:'it',      tag:'스터디',   cur:3, max:5,  org:{ko:'IT/개발 · 서울',en:'IT/Dev · Seoul',zh:'IT/开发 · 首尔',ja:'IT/開発 · ソウル'},      title:{ko:'프론트엔드 스터디 팀원 모집',en:'Frontend Study Group Members Wanted',zh:'招募前端学习小组成员',ja:'フロントエンドスタディメンバー募集'} },
+  { id:'cr02', community:'it',      tag:'해커톤',   cur:2, max:4,  org:{ko:'IT/개발 · 전국',en:'IT/Dev · Nationwide',zh:'IT/开发 · 全国',ja:'IT/開発 · 全国'},     title:{ko:'ESG 해커톤 같이 나갈 팀원 구해요',en:'Looking for teammates for the ESG hackathon',zh:'招募一起参加ESG黑客松的队友',ja:'ESGハッカソンに一緒に出るメンバー募集'} },
+  { id:'cr03', community:'design',  tag:'프로젝트', cur:2, max:4,  org:{ko:'기획 · 오산대',en:'Planning · Osan Univ.',zh:'企划 · 乌山大学',ja:'企画 · 烏山大'},      title:{ko:'앱 서비스 기획 프로젝트 팀원 구해요!',en:'Looking for App Planning Project Members!',zh:'招募App服务企划项目成员！',ja:'アプリサービス企画プロジェクトメンバー募集！'} },
+  { id:'cr04', community:'marketing',tag:'대외활동',cur:5, max:10, org:{ko:'마케팅 · 전국',en:'Marketing · Nationwide',zh:'市场营销 · 全国',ja:'マーケティング · 全国'}, title:{ko:'대학생 마케팅 서포터즈 15기 모집',en:'15th College Marketing Supporters',zh:'第15期大学生市场营销支持者招募',ja:'大学生マーケティングサポーターズ15期募集'} },
+  { id:'cr05', community:'study',   tag:'스터디',   cur:4, max:6,  org:{ko:'어학 · 오산대',en:'Language · Osan Univ.',zh:'语言 · 乌山大学',ja:'語学 · 烏山大'},      title:{ko:'토익 900점 목표 스터디원 모집',en:'TOEIC 900 target study group',zh:'招募托业900分目标学习小组',ja:'TOEIC900点目標スタディメンバー募集'} },
+  { id:'cr06', community:'school',  tag:'행사',     cur:8, max:15, org:{ko:'교내 · 오산대',en:'On campus · Osan Univ.',zh:'校内 · 乌山大学',ja:'学内 · 烏山大'},     title:{ko:'교내 체육대회 학과 대표팀 모집',en:'Department team for the campus sports day',zh:'招募校内运动会学科代表队',ja:'学内体育大会の学科代表チーム募集'} },
+  { id:'cr07', community:'travelcamp',tag:'번개',   cur:3, max:6,  org:{ko:'여행 · 제주',en:'Travel · Jeju',zh:'旅行 · 济州',ja:'旅行 · 済州'},                    title:{ko:'제주도 2박 3일 번개 여행 인원 모집',en:'Jeju 3-day meetup trip — join us',zh:'招募济州岛3天2夜快闪旅行成员',ja:'済州島2泊3日突発旅行メンバー募集'} },
 ];
 
 /* 샘플 글 + 내가 쓴 글을 한 커뮤니티 기준으로 합친다.
@@ -887,11 +898,13 @@ function communityPosts(id){
     .map(p => ({
       author: ct(COMM_AUTHORS[p.author]), title: ct(p.title), tag: null,
       like: p.like, comment: p.comment, createdAt: Date.now() - p.hours * 3600000,
-      route: '#/detail', mine: false,
+      route: '#/detail/' + p.id, mine: false,
     }));
   return mine.concat(samples);
 }
 function communityRecruits(id){ return COMM_RECRUITS.filter(r => r.community === id); }
+function findCommPost(id){ return COMM_POSTS.find(p => p.id === id) || null; }
+function findRecruit(id){ return COMM_RECRUITS.find(r => r.id === id) || null; }
 
 /* ════════════════════════════════════════════════════════════
    화면: 커뮤니티
@@ -1119,7 +1132,7 @@ function initCommunityRoom(id){
       const color = TAG_COLORS[r.tag] || DEFAULT_TAG;
       const pct = Math.round(r.cur / r.max * 100);
       return `
-      <div class="recruit-card" data-route="#/detail">
+      <div class="recruit-card" data-route="#/detail/${r.id}">
         <div class="recruit-body">
           <span class="recruit-tag" style="background:${color.bg};color:${color.fg};">${translateTag(r.tag)}</span>
           <p class="recruit-title">${ct(r.title)}</p>
@@ -1146,18 +1159,79 @@ function initCommunityRoom(id){
 /* ════════════════════════════════════════════════════════════
    화면: 상세보기
    ════════════════════════════════════════════════════════════ */
-const DETAIL_SAMPLE = {
-  title:{ko:'2026 UI/UX 디자인 공모전', en:'2026 UI/UX Design Contest', zh:'2026 UI/UX设计大赛', ja:'2026 UI/UXデザインコンテスト'},
-  desc:{
-    ko:'사용자 경험을 혁신할 수 있는 창의적인<br>UI/UX 디자인을 기다립니다.',
-    en:'We’re looking for creative UI/UX designs<br>that can reinvent the user experience.',
-    zh:'期待能够革新用户体验的<br>富有创意的UI/UX设计作品。',
-    ja:'ユーザー体験を革新できる創造的な<br>UI/UXデザインをお待ちしています。',
+/* 분야별 상세 정보 — 항목마다 주최사를 지어내는 대신 분야 단위로 묶어 둔다 */
+const INFO_PRESET = {
+  '공모전': {
+    host:{ko:'한국대학교육협의회',en:'Korean Council for University Education',zh:'韩国大学教育协议会',ja:'韓国大学教育協議会'},
+    target:{ko:'전국 대학(원)생',en:'University & grad students nationwide',zh:'全国大学（研究生）在校生',ja:'全国の大学(院)生'},
+    method:{ko:'홈페이지 접수',en:'Apply on the website',zh:'官网报名',ja:'ホームページから応募'},
+    prize:{ko:'총 상금 1,000만원',en:'10M KRW in total prizes',zh:'总奖金1,000万韩元',ja:'総賞金1,000万ウォン'},
+  },
+  '스터디': {
+    host:{ko:'학생 자율 모임',en:'Student-run group',zh:'学生自主小组',ja:'学生の自主グループ'},
+    target:{ko:'관심 있는 재학생 누구나',en:'Any interested student',zh:'感兴趣的在校生',ja:'興味のある在学生'},
+    method:{ko:'커뮤니티 댓글 신청',en:'Comment on the post',zh:'在社区留言报名',ja:'コミュニティのコメントで応募'},
+    prize:{ko:'수료 시 활동 인증서',en:'Certificate on completion',zh:'结业颁发证书',ja:'修了時に活動証明書'},
+  },
+  '대외활동': {
+    host:{ko:'기업 · 기관 연계',en:'Partner companies & institutions',zh:'企业·机构合作',ja:'企業・機関との連携'},
+    target:{ko:'전국 대학(원)생',en:'University & grad students nationwide',zh:'全国大学（研究生）在校生',ja:'全国の大学(院)生'},
+    method:{ko:'온라인 지원서 제출',en:'Submit the online form',zh:'提交在线申请表',ja:'オンライン応募フォーム提出'},
+    prize:{ko:'활동비 및 수료증',en:'Stipend and certificate',zh:'活动补贴及结业证',ja:'活動費と修了証'},
+  },
+  '행사': {
+    host:{ko:'교내 학생지원팀',en:'Campus Student Affairs',zh:'校内学生支援组',ja:'学内学生支援チーム'},
+    target:{ko:'재학생 및 일반인',en:'Students and the public',zh:'在校生及公众',ja:'在学生および一般'},
+    method:{ko:'현장 및 사전 등록',en:'On-site or pre-registration',zh:'现场及预先登记',ja:'当日および事前登録'},
+    prize:{ko:'참가자 기념품 증정',en:'Souvenirs for participants',zh:'参与者纪念品',ja:'参加者へ記念品進呈'},
+  },
+  '프로젝트': {
+    host:{ko:'학생 자율 팀',en:'Student-led team',zh:'学生自主团队',ja:'学生の自主チーム'},
+    target:{ko:'분야별 팀원 모집',en:'Members by role',zh:'按领域招募成员',ja:'分野別のメンバー募集'},
+    method:{ko:'포트폴리오 제출 후 면담',en:'Portfolio, then a short chat',zh:'提交作品集后面谈',ja:'ポートフォリオ提出後に面談'},
+    prize:{ko:'결과물 공동 저작',en:'Shared credit on the outcome',zh:'成果共同署名',ja:'成果物の共同制作'},
   },
 };
+const INFO_DEFAULT = INFO_PRESET['대외활동'];
+function infoFor(tags){
+  for(const tag of tags){ if(INFO_PRESET[tag]) return INFO_PRESET[tag]; }
+  return INFO_DEFAULT;
+}
+
+/* 주소의 id가 무엇을 가리키는지 찾는다.
+   내가 쓴 글 → 활동 콘텐츠 → 커뮤니티 샘플 글 → 모집글 순으로 확인한다. */
+function resolveDetail(param){
+  if(!param) return { kind:'content', item: CONTENTS[0] };
+  const mine = loadPosts().find(p => p.id === param);
+  if(mine) return { kind:'mypost', item: mine };
+  const content = findContent(param);
+  if(content) return { kind:'content', item: content };
+  const cpost = findCommPost(param);
+  if(cpost) return { kind:'commpost', item: cpost };
+  const recruit = findRecruit(param);
+  if(recruit) return { kind:'recruit', item: recruit };
+  return null;
+}
+
+/* 콘텐츠와 모집글은 생김새가 같으므로 한 모양으로 맞춰 둔다 */
+function activityShape(item, kind){
+  if(kind === 'recruit'){
+    const c = findCommunity(item.community);
+    return {
+      tags:[item.tag], title:item.title, desc:item.desc || null,
+      img:null, icon:(c && c.icon) || 'iconoir:group',
+      deadline:null, capacity:`${item.cur}/${item.max}${t('community.peopleUnit')}`, org:item.org,
+    };
+  }
+  return {
+    tags:item.tags, title:item.title, desc:item.desc || null,
+    img:item.img || null, icon:item.icon || 'iconoir:trophy',
+    deadline:item.deadline, capacity:null, org:null,
+  };
+}
 
 const ViewDetail = {
-  /* 저장된 내 글 (#/detail/<id>) — 샘플 공모전 상세와 레이아웃이 다르다 */
+  /* 저장된 내 글 (#/detail/<id>) — 활동 상세와 레이아웃이 다르다 */
   renderUserPost(post){
     const c = TAG_COLORS[post.category] || DEFAULT_TAG;
     const hero = post.photos.length
@@ -1198,14 +1272,49 @@ const ViewDetail = {
       </div>`;
   },
 
-  render(param){
-    const post = param ? loadPosts().find(p => p.id === param) : null;
-    if(post) return this.renderUserPost(post);
-
+  /* 커뮤니티 샘플 글 — 작성자와 시간이 붙는다 */
+  renderCommPost(p){
+    const c = findCommunity(p.community);
     return `
       <div class="app">
-        <div class="hero" style="background-image:url('https://images.unsplash.com/photo-1602576666092-bf6447a729fc?w=900&h=530&fit=crop&q=80');">
-          <span class="icon icon-wm" style="${iconMask('iconoir:trophy')}"></span>
+        <div class="hero">
+          <span class="icon icon-wm" style="${iconMask((c && c.icon) || 'iconoir:message-text')}"></span>
+          <div class="hero-topbar">
+            <button class="round-btn" id="detailBack" aria-label="${t('detail.backAria')}">
+              <span class="icon" style="${iconMask('iconoir:nav-arrow-left')}"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="content">
+          <span class="cat-badge">${c ? communityName(c) : ''}</span>
+          <h1 class="title">${ct(p.title)}</h1>
+          <div class="title-meta">
+            <span class="subtag">${ct(COMM_AUTHORS[p.author])}</span>
+            <span class="dot-sep"></span>
+            <span class="subtag">${timeAgo(Date.now() - p.hours * 3600000)}</span>
+          </div>
+
+          <p class="post-body">${ct(p.body)}</p>
+
+          <div class="post-reactions">
+            <span class="stat"><span class="icon" style="${iconMask('iconoir:heart')}"></span>${p.like}</span>
+            <span class="stat"><span class="icon" style="${iconMask('iconoir:message-text')}"></span>${p.comment}</span>
+          </div>
+        </div>
+      </div>`;
+  },
+
+  /* 활동(공모전·스터디·모집글) 상세 */
+  renderActivity(view){
+    const heroStyle = view.img ? ` style="background-image:url('${view.img}');"` : '';
+    const meta = view.deadline
+      ? `<span class="deadline">${t('common.deadlineLabel', view.deadline)}</span>`
+      : `<span class="deadline">${view.capacity || ''}</span>`;
+    return `
+      <div class="app">
+        <div class="hero"${heroStyle}>
+          <span class="icon icon-wm" style="${iconMask(view.icon)}"></span>
           <div class="hero-topbar">
             <button class="round-btn" id="detailBack" aria-label="${t('detail.backAria')}">
               <span class="icon" style="${iconMask('iconoir:nav-arrow-left')}"></span>
@@ -1217,33 +1326,35 @@ const ViewDetail = {
         </div>
 
         <div class="content">
-          <span class="cat-badge">${translateTag('공모전')}</span>
-          <h1 class="title">${ct(DETAIL_SAMPLE.title)}</h1>
+          <span class="cat-badge">${translateTag(view.tags[0])}</span>
+          <h1 class="title">${ct(view.title)}</h1>
           <div class="title-meta">
-            <span class="deadline">${t('common.deadlineLabel', '~05.20')}</span>
+            ${meta}
             <span class="dot-sep"></span>
-            <span class="subtag">${translateTag('디자인')}</span>
+            <span class="subtag">${view.org ? ct(view.org) : translateTag(view.tags[1] || view.tags[0])}</span>
           </div>
 
           <div class="info-grid" id="infoGrid"></div>
 
+          ${view.desc ? `
           <div class="section">
             <h2>${t('detail.introTitle')}</h2>
-            <p class="desc">${ct(DETAIL_SAMPLE.desc)}</p>
-          </div>
+            <p class="desc">${ct(view.desc)}</p>
+          </div>` : ''}
 
           <div class="hashtag-row" id="hashtags"></div>
 
+          ${view.deadline ? `
           <div class="section">
             <h2>${t('detail.periodTitle')}</h2>
             <div class="period-card">
               <div class="icon-box"><span class="icon" style="${iconMask('iconoir:calendar')}"></span></div>
               <div>
                 <div class="p-label">${t('detail.periodTitle')}</div>
-                <div class="p-value">2026.04.01(수) ~ 2026.05.20(수) 23:59</div>
+                <div class="p-value">${periodText(view.deadline)}</div>
               </div>
             </div>
-          </div>
+          </div>` : ''}
         </div>
       </div>
 
@@ -1254,9 +1365,25 @@ const ViewDetail = {
       </div>`;
   },
 
+  render(param){
+    const found = resolveDetail(param);
+    if(!found) return `<div class="app"></div>`;     // init에서 안내 후 되돌린다
+    if(found.kind === 'mypost')   return this.renderUserPost(found.item);
+    if(found.kind === 'commpost') return this.renderCommPost(found.item);
+    return this.renderActivity(activityShape(found.item, found.kind));
+  },
+
   init(param){
-    const post = param ? loadPosts().find(p => p.id === param) : null;
-    if(post){
+    const found = resolveDetail(param);
+
+    if(!found){                                      // 삭제됐거나 없는 id
+      alert(t('post.notFound'));
+      location.hash = '#/community';
+      return;
+    }
+
+    if(found.kind === 'mypost'){
+      const post = found.item;
       /* 글이 속한 커뮤니티로 돌아간다 (커뮤니티가 없던 예전 글은 목록으로) */
       const back = post.community && findCommunity(post.community)
         ? '#/community/' + post.community
@@ -1269,17 +1396,21 @@ const ViewDetail = {
       });
       return;
     }
-    if(param){                       // 삭제됐거나 없는 id
-      alert(t('post.notFound'));
-      location.hash = '#/community';
+
+    if(found.kind === 'commpost'){
+      const back = '#/community/' + found.item.community;
+      APP.querySelector('#detailBack').addEventListener('click', () => location.hash = back);
       return;
     }
 
+    /* 활동 상세 — 분야에 맞춰 정보와 해시태그를 채운다 */
+    const view = activityShape(found.item, found.kind);
+    const preset = infoFor(view.tags);
     const info = [
-      { label:t('info.host'), value:'한국디자인진흥원', icon:'iconoir:building' },
-      { label:t('info.target'), value:'전국 대학(원)생', icon:'iconoir:group' },
-      { label:t('info.method'), value:'홈페이지 접수', icon:'iconoir:send' },
-      { label:t('info.prize'), value:'총 상금 1,000만원', icon:'iconoir:trophy' },
+      { label:t('info.host'),   value:ct(preset.host),   icon:'iconoir:building' },
+      { label:t('info.target'), value:view.capacity || ct(preset.target), icon:'iconoir:group' },
+      { label:t('info.method'), value:ct(preset.method), icon:'iconoir:send' },
+      { label:t('info.prize'),  value:ct(preset.prize),  icon:'iconoir:trophy' },
     ];
     APP.querySelector('#infoGrid').innerHTML = info.map(i => `
       <div class="info-item">
@@ -1291,8 +1422,9 @@ const ViewDetail = {
       </div>
     `).join('');
 
-    const tags = ['#UIUX','#디자인','#아이디어','#공모전'];
-    APP.querySelector('#hashtags').innerHTML = tags.map(t => `<span class="hashtag">${t}</span>`).join('');
+    APP.querySelector('#hashtags').innerHTML = view.tags
+      .map(tag => `<span class="hashtag">#${translateTag(tag).replace(/\s*\/\s*/g, '')}</span>`)
+      .join('');
 
     APP.querySelector('#detailBack').addEventListener('click', () => history.back());
 
@@ -1375,7 +1507,7 @@ const ViewSave = {
           if(selected.has(i)){ selected.delete(i); chk.classList.remove('checked'); }
           else{ selected.add(i); chk.classList.add('checked'); }
         } else {
-          location.hash = '#/detail';
+          location.hash = '#/detail/' + saved[i].id;
         }
       });
     });
