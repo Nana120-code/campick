@@ -1234,6 +1234,13 @@ function resolveDetail(param){
   return null;
 }
 
+/* 목록용 img는 200×200 썸네일이라 상세 상단에 그대로 쓰면 6배 넘게 늘어나 깨져 보인다.
+   같은 Unsplash 사진을 상단 비율(390:230)에 맞는 큰 크기로 다시 요청한다. */
+function heroImage(url){
+  if(!url) return null;
+  return url.replace(/([?&])w=\d+&h=\d+/, '$1w=1200&h=708');
+}
+
 /* 콘텐츠와 모집글은 생김새가 같으므로 한 모양으로 맞춰 둔다 */
 function activityShape(item, kind){
   if(kind === 'recruit'){
@@ -1246,7 +1253,7 @@ function activityShape(item, kind){
   }
   return {
     tags:item.tags, title:item.title, desc:item.desc || null,
-    img:item.img || null, icon:item.icon || 'iconoir:trophy',
+    img:heroImage(item.img), icon:item.icon || 'iconoir:trophy',
     deadline:item.deadline, capacity:null, org:null,
   };
 }
